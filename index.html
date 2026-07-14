@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<title>睫角守宫 ID</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.08);
+  --text: #e8e8f0;
+  --text2: rgba(255,255,255,0.45);
+  --accent: #6ecc8a;
+  --female: #d4688a;
+  --male: #4888c8;
+  --radius: 16px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;
+  background: var(--bg); color: var(--text);
+  min-height: 100vh; min-height: 100dvh;
+  overflow-x: hidden;
+  padding-bottom: calc(80px + var(--safe-bottom));
+}
+input, textarea, select, button { font-family: inherit; font-size: inherit; }
+
+/* ====== Header ====== */
+.app-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(10,10,15,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+.app-header h1 { font-size: 18px; font-weight: 700; }
+.app-header h1 span { color: var(--accent); }
+.header-actions { display: flex; gap: 8px; }
+.btn-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.btn-icon:active { transform: scale(.92); background: rgba(255,255,255,0.08); }
+
+/* ====== Tabs ====== */
+.tab-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(10,10,15,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex; padding: 6px 0 calc(6px + var(--safe-bottom));
+}
+.tab-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 2px; padding: 6px 0;
+  background: none; border: none; color: var(--text2);
+  font-size: 10px; cursor: pointer; transition: all .15s;
+}
+.tab-btn .tab-icon { font-size: 22px; line-height: 1; }
+.tab-btn.active { color: var(--accent); }
+.tab-btn:active { transform: scale(.92); }
+
+/* ====== Pages ====== */
+.page { display: none; padding: 12px 16px; }
+.page.active { display: block; }
+
+/* ====== List ====== */
+.search-box {
+  width: 100%; padding: 10px 14px; border-radius: 12px;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); font-size: 14px; outline: none; margin-bottom: 12px;
+}
+.search-box::placeholder { color: var(--text2); }
+
+.gecko-list { display: flex; flex-direction: column; gap: 10px; }
+.gecko-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: var(--radius);
+  background: var(--surface); border: 1px solid var(--border);
+  cursor: pointer; transition: all .15s;
+}
+.gecko-item:active { transform: scale(.98); background: rgba(255,255,255,0.07); }
+.gecko-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.gecko-avatar.f { background: linear-gradient(135deg,#2d1a24,#1a1a2a); border: 2px solid rgba(212,104,138,0.3); }
+.gecko-avatar.m { background: linear-gradient(135deg,#1a2a3d,#1a1a2a); border: 2px solid rgba(72,136,200,0.3); }
+.gecko-info { flex: 1; min-width: 0; }
+.gecko-info .g-name { font-weight: 700; font-size: 15px; }
+.gecko-info .g-morph { font-size: 12px; color: var(--text2); }
+.gecko-info .g-meta { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.gecko-arrow { color: var(--text2); font-size: 12px; }
+.sex-tag { display: inline-block; padding: 1px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; }
+.sex-tag.f { background: rgba(212,104,138,0.15); color: var(--female); }
+.sex-tag.m { background: rgba(72,136,200,0.15); color: var(--male); }
+
+.empty-state {
+  text-align: center; padding: 60px 20px; color: var(--text2);
+}
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state p { font-size: 14px; line-height: 1.8; }
+
+/* ====== Form ====== */
+.form-group { margin-bottom: 14px; }
+.form-label { font-size: 12px; color: var(--text2); margin-bottom: 4px; display: block; font-weight: 500; }
+.form-input, .form-select, .form-textarea {
+  width: 100%; padding: 10px 12px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); font-size: 14px; outline: none;
+  transition: border .15s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+.form-textarea { min-height: 70px; resize: vertical; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-section { margin: 16px 0 8px; }
+.form-section h3 {
+  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text2); border-bottom: 1px solid var(--border); padding-bottom: 6px;
+}
+
+.gene-entry {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 10px; margin-bottom: 8px;
+}
+.gene-entry .gene-row { display: flex; gap: 8px; align-items: center; }
+.gene-entry .gene-row input { flex: 1; }
+.gene-entry .btn-remove-gene {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(255,80,80,0.1); border: none; color: #ff6060;
+  font-size: 16px; cursor: pointer; flex-shrink: 0;
+}
+
+.btn {
+  width: 100%; padding: 12px; border-radius: 12px;
+  border: none; font-weight: 600; font-size: 15px; cursor: pointer;
+  transition: all .15s;
+}
+.btn:active { transform: scale(.97); }
+.btn-primary { background: linear-gradient(135deg, #4a9e6a, #6ecc8a); color: #0a0a0f; }
+.btn-danger { background: rgba(255,80,80,0.15); color: #ff6060; border: 1px solid rgba(255,80,80,0.2); }
+.btn-outline {
+  background: var(--surface); border: 1px solid var(--border); color: var(--text);
+}
+.btn-group { display: flex; gap: 8px; margin-top: 20px; }
+.btn-group .btn { flex: 1; }
+
+/* ====== Detail ====== */
+.detail-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px;
+}
+.detail-header .back-btn {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.detail-avatar {
+  width: 72px; height: 72px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 32px;
+  flex-shrink: 0;
+}
+.detail-avatar.f { background: linear-gradient(135deg,#2d1a24,#1a1a2a); border: 3px solid rgba(212,104,138,0.3); }
+.detail-avatar.m { background: linear-gradient(135deg,#1a2a3d,#1a1a2a); border: 3px solid rgba(72,136,200,0.3); }
+.detail-title { flex: 1; }
+.detail-title h2 { font-size: 20px; font-weight: 700; }
+.detail-title .sub { font-size: 12px; color: var(--text2); }
+.detail-title .morph-badge {
+  display: inline-block; margin-top: 4px; padding: 2px 10px;
+  background: rgba(110,204,138,0.1); border: 1px solid rgba(110,204,138,0.2);
+  border-radius: 8px; font-size: 11px; color: var(--accent);
+}
+
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.detail-cell {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 12px;
+}
+.detail-cell.full { grid-column: 1 / -1; }
+.detail-cell .label { font-size: 10px; color: var(--text2); letter-spacing: 1px; }
+.detail-cell .value { font-size: 14px; font-weight: 600; margin-top: 1px; }
+
+.detail-section { margin-bottom: 16px; }
+.detail-section h3 {
+  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text2); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 8px;
+}
+
+.gene-chip {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 10px; margin-bottom: 4px;
+  display: flex; justify-content: space-between; font-size: 13px;
+}
+.gene-chip .g-name { color: var(--text2); }
+.gene-chip .g-val { font-weight: 600; }
+
+.parents-grid-detail { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.parent-card-detail {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px; text-align: center;
+}
+.parent-card-detail .role { font-size: 9px; letter-spacing: 2px; color: var(--text2); text-transform: uppercase; }
+.parent-card-detail .p-name { font-weight: 700; font-size: 14px; }
+.parent-card-detail .p-morph { font-size: 11px; color: var(--text2); }
+
+.detail-note {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px; font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.55);
+}
+
+/* ====== QR Section ====== */
+.qr-section {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; margin-top: 16px;
+  text-align: center;
+}
+.qr-section h3 { font-size: 12px; color: var(--text2); letter-spacing: 2px; margin-bottom: 12px; }
+#qrcode { display: inline-block; padding: 12px; background: #fff; border-radius: 12px; }
+.qr-tip { font-size: 11px; color: var(--text2); margin-top: 8px; }
+.qr-share-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin-top: 10px; padding: 6px 14px; border-radius: 8px;
+  background: rgba(110,204,138,0.1); border: 1px solid rgba(110,204,138,0.2);
+  color: var(--accent); font-size: 12px; cursor: pointer;
+}
+
+/* ====== Scanner ====== */
+#scanner { width: 100%; max-width: 400px; margin: 0 auto; }
+#scanner video { border-radius: 12px; }
+.scanner-box {
+  text-align: center; padding: 20px 0;
+}
+.scanner-box .hint {
+  font-size: 13px; color: var(--text2); margin-bottom: 12px;
+}
+.scanner-box .btn-stop {
+  margin-top: 12px; padding: 8px 20px; border-radius: 10px;
+  background: rgba(255,80,80,0.15); border: 1px solid rgba(255,80,80,0.2);
+  color: #ff6060; font-size: 13px; cursor: pointer;
+}
+.scanner-result {
+  margin-top: 16px; padding: 12px; border-radius: 10px;
+  background: rgba(110,204,138,0.1); border: 1px solid rgba(110,204,138,0.2);
+  font-size: 14px; color: var(--accent); text-align: center;
+}
+
+/* ====== Import/Export ====== */
+.io-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; text-align: center; margin: 12px 0;
+}
+.io-box .icon { font-size: 36px; margin-bottom: 8px; }
+.io-box p { font-size: 13px; color: var(--text2); margin-bottom: 12px; }
+.io-box input[type="file"] { display: none; }
+
+/* ====== Toast ====== */
+.toast {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+  background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 10px 20px; font-size: 13px; color: var(--text);
+  z-index: 999; opacity: 0; transition: opacity .3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* ====== Confirm Modal ====== */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+  background: #1a1a24; border: 1px solid var(--border);
+  border-radius: 20px; padding: 24px; max-width: 320px; width: 100%;
+  text-align: center;
+}
+.modal-box h3 { font-size: 17px; margin-bottom: 8px; }
+.modal-box p { font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 16px; }
+.modal-btns { display: flex; gap: 8px; }
+.modal-btns .btn { padding: 10px; font-size: 14px; }
+
+/* ====== Empty list prompt for first-time ====== */
+.getting-started {
+  text-align: center; padding: 30px 0;
+}
+.getting-started .step {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 12px;
+}
+.getting-started .step-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(110,204,138,0.15); color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; flex-shrink: 0;
+}
+.getting-started .step-text { text-align: left; font-size: 13px; }
+.getting-started .step-text strong { display: block; }
+
+/* Responsive */
+@media (min-width: 500px) {
+  .page { max-width: 480px; margin: 0 auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- ====== Header ====== -->
+<header class="app-header">
+  <h1><span>🦎</span> 睫角ID</h1>
+  <div class="header-actions">
+    <button class="btn-icon" onclick="exportData()" title="导出数据">📤</button>
+  </div>
+</header>
+
+<!-- ====== Pages ====== -->
+
+<!-- Page: List -->
+<div class="page active" id="pageList">
+  <input class="search-box" id="searchInput" placeholder="🔍 搜索名字、品系、基因..." oninput="renderList()">
+  <div id="listContent"></div>
+</div>
+
+<!-- Page: Add / Edit -->
+<div class="page" id="pageForm">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+    <button class="btn-icon" onclick="showPage('list')" style="width:36px;height:36px;">←</button>
+    <h2 style="font-size:17px;font-weight:600;" id="formTitle">添加睫角</h2>
+  </div>
+  <div class="form-group">
+    <label class="form-label">名字 *</label>
+    <input class="form-input" id="fName" placeholder="如: 小橘子">
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label class="form-label">英文名</label>
+      <input class="form-input" id="fEname" placeholder="Little Orange">
+    </div>
+    <div class="form-group">
+      <label class="form-label">品系</label>
+      <input class="form-input" id="fMorph" placeholder="Red Harlequin">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label class="form-label">性别</label>
+      <select class="form-select" id="fSex">
+        <option value="female">♀ 雌性</option>
+        <option value="male">♂ 雄性</option>
+        <option value="unknown">❓ 未知</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">体重 (g)</label>
+      <input class="form-input" id="fWeight" type="number" step="0.1" placeholder="35">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label class="form-label">破壳日期</label>
+      <input class="form-input" id="fHatch" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">编号 (可选)</label>
+      <input class="form-input" id="fId" placeholder="自动生成" disabled style="color:var(--text2);">
+    </div>
+  </div>
+
+  <div class="form-section"><h3>🧬 基因信息</h3></div>
+  <div id="geneContainer"></div>
+  <button class="btn btn-outline" onclick="addGene()" style="padding:8px;font-size:13px;">+ 添加基因</button>
+
+  <div class="form-section"><h3>👪 亲本</h3></div>
+  <div class="form-row">
+    <div class="form-group">
+      <label class="form-label">♂ 父亲名字</label>
+      <input class="form-input" id="fDadName" placeholder="火焰">
+    </div>
+    <div class="form-group">
+      <label class="form-label">♂ 父亲品系</label>
+      <input class="form-input" id="fDadMorph" placeholder="Flame">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label class="form-label">♀ 母亲名字</label>
+      <input class="form-input" id="fMomName" placeholder="奶油">
+    </div>
+    <div class="form-group">
+      <label class="form-label">♀ 母亲品系</label>
+      <input class="form-input" id="fMomMorph" placeholder="Cream">
+    </div>
+  </div>
+
+  <div class="form-section"><h3>📝 备注</h3></div>
+  <div class="form-group">
+    <textarea class="form-textarea" id="fNotes" placeholder="头部红色表现突出，背部脊纹完整..."></textarea>
+  </div>
+
+  <div class="btn-group">
+    <button class="btn btn-primary" onclick="saveGecko()">💾 保存</button>
+    <button class="btn btn-danger" id="btnDelete" onclick="deleteGecko()" style="display:none;">🗑️ 删除</button>
+  </div>
+</div>
+
+<!-- Page: Detail -->
+<div class="page" id="pageDetail">
+  <div id="detailContent"></div>
+</div>
+
+<!-- Page: Scanner -->
+<div class="page" id="pageScanner">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+    <button class="btn-icon" onclick="stopScanner();showPage('list')" style="width:36px;height:36px;">←</button>
+    <h2 style="font-size:17px;font-weight:600;">📷 扫码识别</h2>
+  </div>
+  <div class="scanner-box">
+    <div class="hint">对准二维码，自动识别睫角信息</div>
+    <div id="scanner"></div>
+    <div id="scannerResult"></div>
+    <button class="btn-stop" id="btnStopScanner" onclick="stopScanner()" style="display:none;">停止扫描</button>
+  </div>
+</div>
+
+<!-- Page: Settings / Data -->
+<div class="page" id="pageSettings">
+  <h2 style="font-size:17px;font-weight:600;margin-bottom:16px;">⚙️ 数据管理</h2>
+  <div class="io-box">
+    <div class="icon">📤</div>
+    <p>导出全部数据为 JSON 备份文件</p>
+    <button class="btn btn-primary" onclick="exportData()" style="width:auto;display:inline-block;padding:10px 24px;">导出备份</button>
+  </div>
+  <div class="io-box">
+    <div class="icon">📥</div>
+    <p>从备份文件导入数据（将覆盖重复ID）</p>
+    <button class="btn btn-outline" onclick="document.getElementById('importFile').click()" style="width:auto;display:inline-block;padding:10px 24px;">选择文件导入</button>
+    <input type="file" id="importFile" accept=".json" onchange="importData(event)">
+  </div>
+  <div class="io-box" style="border-color:rgba(255,80,80,0.2);">
+    <div class="icon">⚠️</div>
+    <p>清除所有睫角数据（不可恢复）</p>
+    <button class="btn btn-danger" onclick="confirmClear()" style="width:auto;display:inline-block;padding:10px 24px;">清除全部数据</button>
+  </div>
+</div>
+
+<!-- ====== Tab Bar ====== -->
+<nav class="tab-bar">
+  <button class="tab-btn active" data-page="list" onclick="switchTab('list')">
+    <span class="tab-icon">📋</span> 列表
+  </button>
+  <button class="tab-btn" data-page="form" onclick="switchTab('form')">
+    <span class="tab-icon">➕</span> 添加
+  </button>
+  <button class="tab-btn" data-page="scanner" onclick="switchTab('scanner')">
+    <span class="tab-icon">📷</span> 扫码
+  </button>
+  <button class="tab-btn" data-page="settings" onclick="switchTab('settings')">
+    <span class="tab-icon">⚙️</span> 管理
+  </button>
+</nav>
+
+<!-- ====== Toast ====== -->
+<div class="toast" id="toast"></div>
+
+<!-- ====== Confirm Modal ====== -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <h3 id="modalTitle">确认</h3>
+    <p id="modalText">确定要执行此操作吗？</p>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeModal()">取消</button>
+      <button class="btn btn-danger" id="modalConfirmBtn" onclick="">确定</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ====== IndexedDB ======
+const DB_NAME = 'CrestedGeckoDB';
+const DB_VER = 1;
+let db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('geckos')) {
+        const store = d.createObjectStore('geckos', { keyPath: 'id' });
+        store.createIndex('name', 'name', { unique: false });
+        store.createIndex('morph', 'morph', { unique: false });
+      }
+    };
+    req.onsuccess = e => { db = e.target.result; resolve(db); };
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+function dbGetAll() {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('geckos', 'readonly');
+    const req = tx.objectStore('geckos').getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+function dbGet(id) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('geckos', 'readonly');
+    const req = tx.objectStore('geckos').get(id);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+function dbPut(gecko) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('geckos', 'readwrite');
+    const req = tx.objectStore('geckos').put(gecko);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+function dbDelete(id) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('geckos', 'readwrite');
+    const req = tx.objectStore('geckos').delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+function dbClear() {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('geckos', 'readwrite');
+    const req = tx.objectStore('geckos').clear();
+    req.onsuccess = () => resolve();
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+// ====== UUID ======
+function uuid() {
+  return 'g' + Date.now().toString(36).slice(-4) + Math.random().toString(36).slice(2,6);
+}
+
+// ====== Navigation ======
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(t => {
+    t.classList.toggle('active', t.dataset.page === name);
+  });
+}
+
+function switchTab(name) {
+  if (name === 'scanner') {
+    // Don't auto-start scanner until page is shown
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('pageScanner').classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.tab-btn[data-page="${name}"]`).classList.add('active');
+    setTimeout(() => startScanner(), 300);
+    return;
+  }
+  if (name === 'form') {
+    resetForm();
+  }
+  showPage(name);
+}
+
+// ====== Toast ======
+let toastTimer = null;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+// ====== Modal ======
+function showModal(title, text, onConfirm) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalText').textContent = text;
+  document.getElementById('modal').classList.add('show');
+  const btn = document.getElementById('modalConfirmBtn');
+  btn.onclick = () => { closeModal(); onConfirm(); };
+}
+function closeModal() { document.getElementById('modal').classList.remove('show'); }
+
+// ====== List ======
+function renderList() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const container = document.getElementById('listContent');
+
+  dbGetAll().then(all => {
+    const filtered = all.filter(g => {
+      if (!q) return true;
+      const searchText = `${g.name} ${g.englishName||''} ${g.morph||''} ${g.id} ${JSON.stringify(g.genes||[])}`.toLowerCase();
+      return searchText.includes(q);
+    });
+
+    if (filtered.length === 0 && all.length === 0) {
+      container.innerHTML = `
+        <div class="getting-started">
+          <div class="empty-state">
+            <div class="icon">🦎</div>
+            <p>还没有录入睫角数据<br>点击下方 <strong>「添加」</strong> 开始</p>
+          </div>
+          <div class="step">
+            <span class="step-num">1</span>
+            <div class="step-text"><strong>录入信息</strong>输入名字、性别、基因、父母本等</div>
+          </div>
+          <div class="step">
+            <span class="step-num">2</span>
+            <div class="step-text"><strong>生成二维码</strong>每只睫角自动生成专属二维码</div>
+          </div>
+          <div class="step">
+            <span class="step-num">3</span>
+            <div class="step-text"><strong>扫码识别</strong>用「扫码」功能快速调出信息</div>
+          </div>
+        </div>
+      `;
+      return;
+    }
+    if (filtered.length === 0) {
+      container.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>没有找到匹配的睫角</p></div>`;
+      return;
+    }
+
+    container.innerHTML = `<div class="gecko-list">${
+      filtered.sort((a,b) => (b.createdAt||'') > (a.createdAt||'') ? 1 : -1).map(g => {
+        const isF = g.sex === 'female';
+        const sexLabel = isF ? '♀' : g.sex === 'male' ? '♂' : '❓';
+        const sexCls = isF ? 'f' : g.sex === 'male' ? 'm' : '';
+        const parentInfo = [g.father?.name, g.mother?.name].filter(Boolean).join(' × ') || '';
+        return `<div class="gecko-item" onclick="showDetail('${g.id}')">
+          <div class="gecko-avatar ${sexCls}">🦎</div>
+          <div class="gecko-info">
+            <div class="g-name">${g.name} <span class="sex-tag ${sexCls}">${sexLabel}</span></div>
+            <div class="g-morph">${g.morph||'—'}</div>
+            <div class="g-meta">${parentInfo}${g.weight ? ' · '+g.weight+'g' : ''}</div>
+          </div>
+          <span class="gecko-arrow">›</span>
+        </div>`;
+      }).join('')
+    }</div>`;
+  });
+}
+
+// ====== Form ======
+let editingId = null;
+let geneCount = 0;
+
+function resetForm() {
+  editingId = null;
+  document.getElementById('formTitle').textContent = '添加睫角';
+  document.getElementById('btnDelete').style.display = 'none';
+  document.getElementById('fId').value = '';
+  document.getElementById('fName').value = '';
+  document.getElementById('fEname').value = '';
+  document.getElementById('fMorph').value = '';
+  document.getElementById('fSex').value = 'female';
+  document.getElementById('fWeight').value = '';
+  document.getElementById('fHatch').value = '';
+  document.getElementById('fDadName').value = '';
+  document.getElementById('fDadMorph').value = '';
+  document.getElementById('fMomName').value = '';
+  document.getElementById('fMomMorph').value = '';
+  document.getElementById('fNotes').value = '';
+  document.getElementById('geneContainer').innerHTML = '';
+  geneCount = 0;
+}
+
+function addGene(name, value) {
+  const container = document.getElementById('geneContainer');
+  const div = document.createElement('div');
+  div.className = 'gene-entry';
+  div.innerHTML = `<div class="gene-row">
+    <input class="form-input gene-name" placeholder="基因名 (如: Dilute)" value="${name||''}">
+    <input class="form-input gene-val" placeholder="基因型 (如: d/d)" value="${value||''}">
+    <button class="btn-remove-gene" onclick="this.closest('.gene-entry').remove()">×</button>
+  </div>`;
+  container.appendChild(div);
+  geneCount++;
+}
+
+function loadForm(id) {
+  dbGet(id).then(g => {
+    if (!g) { toast('未找到该睫角'); return; }
+    editingId = id;
+    document.getElementById('formTitle').textContent = '编辑 ' + g.name;
+    document.getElementById('btnDelete').style.display = 'block';
+    document.getElementById('fId').value = g.id;
+    document.getElementById('fName').value = g.name || '';
+    document.getElementById('fEname').value = g.englishName || '';
+    document.getElementById('fMorph').value = g.morph || '';
+    document.getElementById('fSex').value = g.sex || 'female';
+    document.getElementById('fWeight').value = g.weight || '';
+    document.getElementById('fHatch').value = g.hatchDate || '';
+    document.getElementById('fDadName').value = g.father?.name || '';
+    document.getElementById('fDadMorph').value = g.father?.morph || '';
+    document.getElementById('fMomName').value = g.mother?.name || '';
+    document.getElementById('fMomMorph').value = g.mother?.morph || '';
+    document.getElementById('fNotes').value = g.notes || '';
+    document.getElementById('geneContainer').innerHTML = '';
+    geneCount = 0;
+    if (g.genes && g.genes.length) {
+      g.genes.forEach(ge => addGene(ge.name, ge.value));
+    }
+    showPage('form');
+    document.querySelectorAll('.tab-btn').forEach(t => t.classList.toggle('active', t.dataset.page === 'form'));
+  });
+}
+
+function collectForm() {
+  const genes = [];
+  document.querySelectorAll('.gene-entry').forEach(el => {
+    const name = el.querySelector('.gene-name').value.trim();
+    const val = el.querySelector('.gene-val').value.trim();
+    if (name) genes.push({ name, value: val || '—' });
+  });
+
+  return {
+    name: document.getElementById('fName').value.trim(),
+    englishName: document.getElementById('fEname').value.trim(),
+    morph: document.getElementById('fMorph').value.trim(),
+    sex: document.getElementById('fSex').value,
+    weight: document.getElementById('fWeight').value.trim(),
+    hatchDate: document.getElementById('fHatch').value,
+    genes: genes,
+    father: {
+      name: document.getElementById('fDadName').value.trim(),
+      morph: document.getElementById('fDadMorph').value.trim()
+    },
+    mother: {
+      name: document.getElementById('fMomName').value.trim(),
+      morph: document.getElementById('fMomMorph').value.trim()
+    },
+    notes: document.getElementById('fNotes').value.trim()
+  };
+}
+
+function saveGecko() {
+  const data = collectForm();
+  if (!data.name) { toast('⚠️ 请输入名字'); document.getElementById('fName').focus(); return; }
+
+  const id = editingId || uuid();
+  const gecko = {
+    id,
+    ...data,
+    createdAt: editingId ? undefined : new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  if (!gecko.englishName) delete gecko.englishName;
+
+  dbPut(gecko).then(() => {
+    toast('✅ 保存成功！');
+    resetForm();
+    showPage('list');
+    renderList();
+  }).catch(e => { toast('❌ 保存失败: '+e.message); });
+}
+
+function deleteGecko() {
+  if (!editingId) return;
+  showModal('确认删除', '删除后数据不可恢复，确定删除 ' + document.getElementById('fName').value + ' 吗？', () => {
+    dbDelete(editingId).then(() => {
+      toast('🗑️ 已删除');
+      resetForm();
+      showPage('list');
+      renderList();
+    });
+  });
+}
+
+// ====== Detail ======
+function showDetail(id) {
+  const container = document.getElementById('detailContent');
+  dbGet(id).then(g => {
+    if (!g) { toast('未找到数据'); return; }
+    const isF = g.sex === 'female';
+    const sexCls = isF ? 'f' : g.sex === 'male' ? 'm' : '';
+    const sexLabel = isF ? '♀ 雌性' : g.sex === 'male' ? '♂ 雄性' : '❓ 未知';
+
+    const genesHtml = (g.genes||[]).map(ge =>
+      `<div class="gene-chip"><span class="g-name">${ge.name}</span><span class="g-val">${ge.value}</span></div>`
+    ).join('') || '<div style="color:var(--text2);font-size:13px;">未记录</div>';
+
+    container.innerHTML = `
+      <div class="detail-header">
+        <button class="back-btn" onclick="showPage('list')">←</button>
+        <div class="detail-avatar ${sexCls}">🦎</div>
+        <div class="detail-title">
+          <h2>${g.name}</h2>
+          <div class="sub">${g.englishName||''}${g.englishName ? ' · ' : ''}编号 ${g.id}</div>
+          <div class="morph-badge">${g.morph||'—'}</div>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-cell">
+          <div class="label">性别</div>
+          <div class="value" style="color:${isF ? 'var(--female)' : g.sex==='male' ? 'var(--male)' : 'var(--text2)'}">${sexLabel}</div>
+        </div>
+        <div class="detail-cell">
+          <div class="label">体重</div>
+          <div class="value">${g.weight ? g.weight+'g' : '—'}</div>
+        </div>
+        <div class="detail-cell">
+          <div class="label">破壳日期</div>
+          <div class="value">${g.hatchDate||'—'}</div>
+        </div>
+        <div class="detail-cell">
+          <div class="label">已录入</div>
+          <div class="value" style="font-size:12px;">${g.createdAt ? new Date(g.createdAt).toLocaleDateString('zh-CN') : '—'}</div>
+        </div>
+      </div>
+
+      <div class="detail-section"><h3>🧬 基因</h3>${genesHtml}</div>
+
+      <div class="detail-section"><h3>👪 亲本</h3>
+        <div class="parents-grid-detail">
+          <div class="parent-card-detail">
+            <div class="role">♂ Father</div>
+            <div class="p-name">${g.father?.name||'—'}</div>
+            <div class="p-morph">${g.father?.morph||''}</div>
+          </div>
+          <div class="parent-card-detail">
+            <div class="role">♀ Mother</div>
+            <div class="p-name">${g.mother?.name||'—'}</div>
+            <div class="p-morph">${g.mother?.morph||''}</div>
+          </div>
+        </div>
+      </div>
+
+      ${g.notes ? `<div class="detail-section"><h3>📝 备注</h3><div class="detail-note">${g.notes}</div></div>` : ''}
+
+      <div class="qr-section">
+        <h3>📱 专属二维码</h3>
+        <div id="qrcode"></div>
+        <div class="qr-tip">扫码可查看此睫角完整信息</div>
+        <button class="qr-share-btn" onclick="shareQR('${g.id}','${g.name}')">📤 分享二维码</button>
+      </div>
+
+      <div class="btn-group" style="margin-top:12px;">
+        <button class="btn btn-outline" onclick="loadForm('${g.id}')">✏️ 编辑</button>
+      </div>
+    `;
+    showPage('detail');
+
+    // Generate QR
+    setTimeout(() => {
+      const container = document.getElementById('qrcode');
+      container.innerHTML = '';
+      const url = window.location.href.split('#')[0].split('?')[0] + '?gecko=' + g.id;
+      new QRCode(container, {
+        text: url,
+        width: 160, height: 160,
+        colorDark: '#0a0a0f',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    }, 100);
+  });
+}
+
+// ====== QR Share ======
+function shareQR(id, name) {
+  const url = window.location.href.split('#')[0].split('?')[0] + '?gecko=' + id;
+  if (navigator.share) {
+    navigator.share({ title: name, text: `${name} 的睫角身份卡片`, url: url });
+  } else {
+    navigator.clipboard.writeText(url).then(() => toast('🔗 链接已复制到剪贴板')).catch(() => toast(url));
+  }
+}
+
+// ====== Scanner ======
+let html5QrCode = null;
+
+function startScanner() {
+  if (html5QrCode) return;
+  try {
+    html5QrCode = new Html5Qrcode("scanner");
+    document.getElementById('btnStopScanner').style.display = 'inline-block';
+    document.getElementById('scannerResult').innerHTML = '';
+
+    html5QrCode.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      onScanSuccess,
+      () => {}
+    ).catch(e => {
+      document.getElementById('scannerResult').innerHTML = `<div style="color:#ff6060;">⚠️ 无法打开相机: ${e.message}</div>`;
+      document.getElementById('btnStopScanner').style.display = 'none';
+    });
+  } catch(e) {
+    document.getElementById('scannerResult').innerHTML = `<div style="color:#ff6060;">⚠️ 扫码库加载失败: ${e.message}</div>`;
+  }
+}
+
+function onScanSuccess(decodedText) {
+  stopScanner();
+  // Extract gecko ID from URL
+  let geckoId = null;
+  try {
+    const url = new URL(decodedText);
+    geckoId = url.searchParams.get('gecko');
+  } catch {
+    // Maybe it's just a raw ID
+    if (decodedText.startsWith('g')) geckoId = decodedText;
+  }
+
+  if (geckoId) {
+    dbGet(geckoId).then(g => {
+      if (g) {
+        document.getElementById('scannerResult').innerHTML =
+          `<div style="color:var(--accent);font-size:15px;">✅ 识别成功！${g.name}</div>
+           <button class="btn btn-primary" onclick="showDetail('${g.id}')" style="margin-top:8px;padding:8px 20px;width:auto;display:inline-block;">查看详情</button>`;
+        toast('✅ 已识别: ' + g.name);
+      } else {
+        document.getElementById('scannerResult').innerHTML =
+          `<div style="color:#ff6060;">⚠️ 未找到编号 "${geckoId}" 的睫角数据</div>
+           <button class="btn btn-outline" onclick="startScanner()" style="margin-top:8px;padding:8px 20px;width:auto;display:inline-block;">重新扫码</button>`;
+      }
+    });
+  } else {
+    document.getElementById('scannerResult').innerHTML =
+      `<div style="color:#ff6060;">⚠️ 无效二维码，未包含睫角信息</div>
+       <button class="btn btn-outline" onclick="startScanner()" style="margin-top:8px;padding:8px 20px;width:auto;display:inline-block;">重新扫码</button>`;
+  }
+}
+
+function stopScanner() {
+  if (html5QrCode) {
+    try { html5QrCode.stop(); } catch(e) {}
+    html5QrCode.clear();
+    html5QrCode = null;
+  }
+  document.getElementById('btnStopScanner').style.display = 'none';
+}
+
+// ====== Data Import/Export ======
+function exportData() {
+  dbGetAll().then(all => {
+    if (all.length === 0) { toast('暂无数据可导出'); return; }
+    const data = JSON.stringify(all, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `睫角数据_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('✅ 导出成功');
+  });
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data)) throw new Error('格式错误');
+      let count = 0;
+      Promise.all(data.map(g => dbPut(g).then(() => count++)))
+        .then(() => {
+          toast(`✅ 导入成功！共 ${count} 条`);
+          renderList();
+        });
+    } catch(err) {
+      toast('❌ 导入失败: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function confirmClear() {
+  showModal('⚠️ 清除全部数据', '此操作不可恢复！将删除所有睫角信息。确定继续？', () => {
+    dbClear().then(() => {
+      toast('已清除全部数据');
+      renderList();
+    });
+  });
+}
+
+// ====== Init ======
+openDB().then(() => {
+  renderList();
+
+  // Check URL for ?gecko=ID (opened from QR scan)
+  const params = new URLSearchParams(window.location.search);
+  const geckoId = params.get('gecko');
+  if (geckoId) {
+    dbGet(geckoId).then(g => {
+      if (g) showDetail(geckoId);
+    });
+  }
+}).catch(e => {
+  document.getElementById('listContent').innerHTML =
+    `<div class="empty-state" style="color:#ff6060;"><div class="icon">⚠️</div><p>数据库初始化失败: ${e.message}</p></div>`;
+});
+</script>
+</body>
+</html>
