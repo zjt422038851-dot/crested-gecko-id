@@ -7,66 +7,88 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
 <title>睫角守宫 ID</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
 :root {
-  --bg: #0a0a0f;
-  --surface: rgba(255,255,255,0.04);
-  --border: rgba(255,255,255,0.08);
-  --text: #e8e8f0;
-  --text2: rgba(255,255,255,0.45);
-  --accent: #6ecc8a;
-  --female: #d4688a;
-  --male: #4888c8;
-  --radius: 16px;
+  /* Light Theme -- Clean & Professional */
+  --bg: #f8f9fb;
+  --bg-deep: #ffffff;
+  --surface: rgba(0,0,0,0.03);
+  --surface-hover: rgba(0,0,0,0.05);
+  --border: #e4e7ec;
+  --border-light: #d0d5dd;
+  --border-accent: rgba(62, 207, 142, 0.4);
+  --text: #101828;
+  --text2: #475467;
+  --text3: #98a2b3;
+  --accent: #12b76a;
+  --accent-link: #039855;
+  --female: #e4789a;
+  --male: #5a9fd4;
+  --danger: #e5484d;
+  --danger-bg: rgba(229, 72, 77, 0.08);
+  --radius: 8px;
+  --radius-card: 12px;
+  --radius-pill: 9999px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --font-sans: 'Inter', 'Noto Sans SC', -apple-system, 'PingFang SC', system-ui, sans-serif;
+  --shadow-sm: 0 1px 2px rgba(16,24,40,0.05);
+  --shadow-md: 0 4px 8px rgba(16,24,40,0.06), 0 1px 2px rgba(16,24,40,0.04);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body {
-  font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;
-  background: var(--bg); color: var(--text);
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
   min-height: 100vh; min-height: 100dvh;
   overflow-x: hidden;
   padding-bottom: calc(80px + var(--safe-bottom));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 input, textarea, select, button { font-family: inherit; font-size: inherit; }
 
 /* ====== Header ====== */
 .app-header {
   position: sticky; top: 0; z-index: 100;
-  background: rgba(10,10,15,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  padding: 12px 16px;
+  background: rgba(255,255,255,0.92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  padding: 10px 16px;
   display: flex; align-items: center; justify-content: space-between;
   border-bottom: 1px solid var(--border);
 }
-.app-header h1 { font-size: 18px; font-weight: 700; }
+.app-header h1 { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; color: var(--text); }
 .app-header h1 span { color: var(--accent); }
-.header-actions { display: flex; gap: 8px; }
+.header-actions { display: flex; gap: 6px; }
 .btn-icon {
-  width: 38px; height: 38px; border-radius: 10px;
-  background: var(--surface); border: 1px solid var(--border);
-  color: var(--text); font-size: 18px; cursor: pointer;
+  width: 36px; height: 36px; border-radius: var(--radius);
+  background: var(--bg-deep); border: 1px solid var(--border);
+  color: var(--text2); font-size: 16px; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: all .15s;
+  box-shadow: var(--shadow-sm);
 }
-.btn-icon:active { transform: scale(.92); background: rgba(255,255,255,0.08); }
+.btn-icon:active { transform: scale(.95); background: var(--surface-hover); box-shadow: none; }
 
 /* ====== Tabs ====== */
 .tab-bar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-  background: rgba(10,10,15,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid var(--border);
-  display: flex; padding: 6px 0 calc(6px + var(--safe-bottom));
+  display: flex; padding: 4px 0 calc(4px + var(--safe-bottom));
+  box-shadow: 0 -1px 3px rgba(16,24,40,0.04);
 }
 .tab-btn {
   flex: 1; display: flex; flex-direction: column; align-items: center;
-  gap: 2px; padding: 6px 0;
-  background: none; border: none; color: var(--text2);
-  font-size: 10px; cursor: pointer; transition: all .15s;
+  gap: 1px; padding: 6px 0;
+  background: none; border: none; color: var(--text3);
+  font-size: 10px; font-weight: 500; cursor: pointer; transition: all .15s;
 }
-.tab-btn .tab-icon { font-size: 22px; line-height: 1; }
+.tab-btn .tab-icon { font-size: 20px; line-height: 1; }
 .tab-btn.active { color: var(--accent); }
 .tab-btn:active { transform: scale(.92); }
 
@@ -76,58 +98,63 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 
 /* ====== List ====== */
 .search-box {
-  width: 100%; padding: 10px 14px; border-radius: 12px;
-  background: var(--surface); border: 1px solid var(--border);
-  color: var(--text); font-size: 14px; outline: none; margin-bottom: 12px;
+  width: 100%; padding: 10px 14px; border-radius: var(--radius);
+  background: var(--bg-deep); border: 1px solid var(--border);
+  color: var(--text); font-size: 14px; font-weight: 400; outline: none; margin-bottom: 12px;
+  transition: border .15s;
+  box-shadow: var(--shadow-sm);
 }
-.search-box::placeholder { color: var(--text2); }
+.search-box:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(18,183,106,0.1); }
+.search-box::placeholder { color: var(--text3); }
 
-.gecko-list { display: flex; flex-direction: column; gap: 10px; }
+.gecko-list { display: flex; flex-direction: column; gap: 8px; }
 .gecko-item {
   display: flex; align-items: center; gap: 12px;
-  padding: 12px 14px; border-radius: var(--radius);
-  background: var(--surface); border: 1px solid var(--border);
+  padding: 12px 14px; border-radius: var(--radius-card);
+  background: var(--bg-deep); border: 1px solid var(--border);
   cursor: pointer; transition: all .15s;
+  box-shadow: var(--shadow-sm);
 }
-.gecko-item:active { transform: scale(.98); background: rgba(255,255,255,0.07); }
+.gecko-item:active { transform: scale(.985); box-shadow: none; }
 .gecko-avatar {
-  width: 48px; height: 48px; border-radius: 50%;
+  width: 44px; height: 44px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 22px; flex-shrink: 0;
+  font-size: 20px; flex-shrink: 0;
 }
-.gecko-avatar.f { background: linear-gradient(135deg,#2d1a24,#1a1a2a); border: 2px solid rgba(212,104,138,0.3); }
-.gecko-avatar.m { background: linear-gradient(135deg,#1a2a3d,#1a1a2a); border: 2px solid rgba(72,136,200,0.3); }
+.gecko-avatar.f { background: linear-gradient(135deg,#fce8ef,#faf0f5); border: 2px solid rgba(228,120,154,0.25); }
+.gecko-avatar.m { background: linear-gradient(135deg,#e8f0fc,#f0f5fa); border: 2px solid rgba(90,159,212,0.25); }
 .gecko-info { flex: 1; min-width: 0; }
-.gecko-info .g-name { font-weight: 700; font-size: 15px; }
-.gecko-info .g-morph { font-size: 12px; color: var(--text2); }
-.gecko-info .g-meta { font-size: 11px; color: var(--text2); margin-top: 2px; }
-.gecko-arrow { color: var(--text2); font-size: 12px; }
+.gecko-info .g-name { font-weight: 500; font-size: 15px; letter-spacing: -0.15px; }
+.gecko-info .g-morph { font-size: 12px; color: var(--text3); }
+.gecko-info .g-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.gecko-arrow { color: var(--text3); font-size: 14px; }
 .sex-tag { display: inline-block; padding: 1px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; }
 .sex-tag.f { background: rgba(212,104,138,0.15); color: var(--female); }
 .sex-tag.m { background: rgba(72,136,200,0.15); color: var(--male); }
 
 .empty-state {
-  text-align: center; padding: 60px 20px; color: var(--text2);
+  text-align: center; padding: 60px 20px; color: var(--text3);
 }
 .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
 .empty-state p { font-size: 14px; line-height: 1.8; }
 
 /* ====== Form ====== */
 .form-group { margin-bottom: 14px; }
-.form-label { font-size: 12px; color: var(--text2); margin-bottom: 4px; display: block; font-weight: 500; }
+.form-label { font-size: 11px; color: var(--text3); margin-bottom: 5px; display: block; font-weight: 500; letter-spacing: 0.3px; text-transform: uppercase; }
 .form-input, .form-select, .form-textarea {
-  width: 100%; padding: 10px 12px; border-radius: 10px;
-  background: var(--surface); border: 1px solid var(--border);
-  color: var(--text); font-size: 14px; outline: none;
-  transition: border .15s;
+  width: 100%; padding: 10px 12px; border-radius: var(--radius);
+  background: var(--bg-deep); border: 1px solid var(--border);
+  color: var(--text); font-size: 14px; font-weight: 400; outline: none;
+  transition: border .15s; box-shadow: var(--shadow-sm);
 }
-.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+.form-select option { background: var(--bg-deep); color: var(--text); }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(18,183,106,0.1); }
 .form-textarea { min-height: 70px; resize: vertical; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .form-section { margin: 16px 0 8px; }
 .form-section h3 {
-  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
-  color: var(--text2); border-bottom: 1px solid var(--border); padding-bottom: 6px;
+  font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase;
+  color: var(--text3); border-bottom: 1px solid var(--border); padding-bottom: 6px; font-weight: 500;
 }
 
 .gene-entry {
@@ -143,18 +170,26 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 }
 
 .btn {
-  width: 100%; padding: 12px; border-radius: 12px;
-  border: none; font-weight: 600; font-size: 15px; cursor: pointer;
+  width: 100%; padding: 10px 16px; border-radius: var(--radius);
+  border: none; font-weight: 600; font-size: 14px; cursor: pointer;
   transition: all .15s;
 }
 .btn:active { transform: scale(.97); }
-.btn-primary { background: linear-gradient(135deg, #4a9e6a, #6ecc8a); color: #0a0a0f; }
-.btn-danger { background: rgba(255,80,80,0.15); color: #ff6060; border: 1px solid rgba(255,80,80,0.2); }
+.btn-primary { background: var(--accent); color: #fff; box-shadow: var(--shadow-sm); }
+.btn-primary:active { box-shadow: none; }
+.btn-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(229,72,77,0.15); }
 .btn-outline {
-  background: var(--surface); border: 1px solid var(--border); color: var(--text);
+  background: var(--bg-deep); border: 1px solid var(--border); color: var(--text2); box-shadow: var(--shadow-sm);
 }
+.btn-outline:active { box-shadow: none; }
 .btn-group { display: flex; gap: 8px; margin-top: 20px; }
 .btn-group .btn { flex: 1; }
+
+/* ====== Gene entries ====== */
+.gene-entry {
+  background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 10px; margin-bottom: 8px; box-shadow: var(--shadow-sm);
+}
 
 /* ====== Detail ====== */
 .detail-header {
@@ -172,149 +207,230 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
   display: flex; align-items: center; justify-content: center; font-size: 32px;
   flex-shrink: 0;
 }
-.detail-avatar.f { background: linear-gradient(135deg,#2d1a24,#1a1a2a); border: 3px solid rgba(212,104,138,0.3); }
-.detail-avatar.m { background: linear-gradient(135deg,#1a2a3d,#1a1a2a); border: 3px solid rgba(72,136,200,0.3); }
+.detail-avatar.f { background: linear-gradient(135deg,#fce8ef,#faf0f5); border: 3px solid rgba(228,120,154,0.25); }
+.detail-avatar.m { background: linear-gradient(135deg,#e8f0fc,#f0f5fa); border: 3px solid rgba(90,159,212,0.25); }
 .detail-title { flex: 1; }
-.detail-title h2 { font-size: 20px; font-weight: 700; }
-.detail-title .sub { font-size: 12px; color: var(--text2); }
+.detail-title h2 { font-size: 20px; font-weight: 500; letter-spacing: -0.3px; }
+.detail-title .sub { font-size: 12px; color: var(--text3); }
 .detail-title .morph-badge {
   display: inline-block; margin-top: 4px; padding: 2px 10px;
-  background: rgba(110,204,138,0.1); border: 1px solid rgba(110,204,138,0.2);
-  border-radius: 8px; font-size: 11px; color: var(--accent);
+  background: rgba(62,207,142,0.1); border: 1px solid var(--border-accent);
+  border-radius: var(--radius-pill); font-size: 11px; color: var(--accent); font-weight: 500;
 }
 
 .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
 .detail-cell {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 10px; padding: 10px 12px;
+  background: var(--bg-deep); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 12px;
+  box-shadow: var(--shadow-sm);
 }
 .detail-cell.full { grid-column: 1 / -1; }
-.detail-cell .label { font-size: 10px; color: var(--text2); letter-spacing: 1px; }
-.detail-cell .value { font-size: 14px; font-weight: 600; margin-top: 1px; }
+.detail-cell .label { font-size: 10px; color: var(--text3); letter-spacing: 0.5px; text-transform: uppercase; font-weight: 500; }
+.detail-cell .value { font-size: 14px; font-weight: 500; margin-top: 1px; }
 
 .detail-section { margin-bottom: 16px; }
 .detail-section h3 {
-  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
-  color: var(--text2); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 8px;
+  font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase;
+  color: var(--text3); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 8px; font-weight: 500;
 }
 
 .gene-chip {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 8px; padding: 8px 10px; margin-bottom: 4px;
+  background: var(--bg-deep); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 8px 10px; margin-bottom: 4px;
   display: flex; justify-content: space-between; font-size: 13px;
 }
-.gene-chip .g-name { color: var(--text2); }
-.gene-chip .g-val { font-weight: 600; }
+.gene-chip .g-name { color: var(--text3); }
+.gene-chip .g-val { font-weight: 500; color: var(--text); }
 
 .parents-grid-detail { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .parent-card-detail {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 10px; padding: 10px; text-align: center;
+  background: var(--bg-deep); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px; text-align: center;
 }
-.parent-card-detail .role { font-size: 9px; letter-spacing: 2px; color: var(--text2); text-transform: uppercase; }
-.parent-card-detail .p-name { font-weight: 700; font-size: 14px; }
-.parent-card-detail .p-morph { font-size: 11px; color: var(--text2); }
+.parent-card-detail .role { font-size: 9px; letter-spacing: 0.5px; color: var(--text3); text-transform: uppercase; font-weight: 500; }
+.parent-card-detail .p-name { font-weight: 500; font-size: 14px; }
+.parent-card-detail .p-morph { font-size: 11px; color: var(--text3); }
+.parent-card-detail .parent-photo {
+  width: 56px; height: 56px; border-radius: 50%; object-fit: cover;
+  margin: 0 auto 6px; display: block;
+  background: var(--surface); border: 2px solid var(--border);
+}
+.parent-photo-placeholder {
+  width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 6px;
+  background: var(--surface); border: 2px dashed var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: var(--text2);
+}
+
+/* Parent image upload */
+.parent-img-upload {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg-deep); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 12px; box-shadow: var(--shadow-sm);
+}
+.parent-img-upload .preview {
+  width: 48px; height: 48px; border-radius: 8px; object-fit: cover;
+  background: rgba(255,255,255,0.03); flex-shrink: 0;
+}
+.parent-img-upload .preview.empty {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: var(--text2); border: 1px dashed var(--border);
+}
+.parent-img-upload .img-info { flex: 1; font-size: 12px; color: var(--text2); }
+.parent-img-upload .img-actions { display: flex; gap: 4px; }
+.parent-img-upload .img-actions button {
+  padding: 4px 10px; border-radius: 6px; border: none;
+  font-size: 11px; cursor: pointer;
+}
+.parent-img-upload .btn-add-img { background: rgba(62,207,142,0.15); color: var(--accent); border: none; font-weight: 500; }
+.parent-img-upload .btn-remove-img { background: var(--danger-bg); color: var(--danger); border: none; font-weight: 500; }
 
 .detail-note {
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: 10px; padding: 10px; font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.55);
+  border-radius: var(--radius); padding: 10px; font-size: 13px; line-height: 1.6; color: var(--text2);
 }
 
 /* ====== QR Section ====== */
 .qr-section {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 20px; margin-top: 16px;
-  text-align: center;
+  background: var(--bg-deep); border: 1px solid var(--border);
+  border-radius: var(--radius-card); padding: 20px; margin-top: 16px;
+  text-align: center; box-shadow: var(--shadow-sm);
 }
-.qr-section h3 { font-size: 12px; color: var(--text2); letter-spacing: 2px; margin-bottom: 12px; }
-#qrcode { display: inline-block; padding: 12px; background: #fff; border-radius: 12px; }
-.qr-tip { font-size: 11px; color: var(--text2); margin-top: 8px; }
-.qr-share-btn {
+.qr-section h3 { font-size: 12px; color: var(--text3); letter-spacing: 0.5px; margin-bottom: 12px; font-weight: 500; }
+#qrcode { display: inline-block; padding: 12px; background: #fff; border-radius: var(--radius); }
+.qr-tip { font-size: 11px; color: var(--text3); margin-top: 8px; }
+.qr-actions {
+  display: flex; gap: 6px; justify-content: center; margin-top: 10px; flex-wrap: wrap;
+}
+.qr-actions button {
   display: inline-flex; align-items: center; gap: 4px;
-  margin-top: 10px; padding: 6px 14px; border-radius: 8px;
-  background: rgba(110,204,138,0.1); border: 1px solid rgba(110,204,138,0.2);
-  color: var(--accent); font-size: 12px; cursor: pointer;
+  padding: 6px 14px; border-radius: var(--radius-pill);
+  background: var(--bg-deep); border: 1px solid var(--border);
+  color: var(--text2); font-size: 12px; cursor: pointer; transition: all .15s; font-weight: 500;
+  box-shadow: var(--shadow-sm);
 }
+.qr-actions button:active { transform: scale(.95); box-shadow: none; }
+.qr-actions .btn-save { background: var(--surface); border-color: var(--border); }
 
 /* ====== Scanner ====== */
 #scanner { width: 100%; max-width: 400px; margin: 0 auto; }
-#scanner video { border-radius: 12px; }
+#scanner video { border-radius: var(--radius); }
 .scanner-box {
   text-align: center; padding: 20px 0;
 }
 .scanner-box .hint {
-  font-size: 13px; color: var(--text2); margin-bottom: 12px;
+  font-size: 13px; color: var(--text3); margin-bottom: 12px; font-weight: 400;
 }
 .scanner-box .btn-stop {
-  margin-top: 12px; padding: 8px 20px; border-radius: 10px;
-  background: rgba(255,80,80,0.15); border: 1px solid rgba(255,80,80,0.2);
-  color: #ff6060; font-size: 13px; cursor: pointer;
+  margin-top: 12px; padding: 8px 20px; border-radius: var(--radius);
+  background: var(--danger-bg); border: 1px solid rgba(229,72,77,0.15);
+  color: var(--danger); font-size: 13px; cursor: pointer; font-weight: 500;
 }
 .scanner-result {
-  margin-top: 16px; padding: 12px; border-radius: 10px;
-  background: rgba(110,204,138,0.1); border: 1px solid rgba(110,204,138,0.2);
+  margin-top: 16px; padding: 12px; border-radius: var(--radius);
+  background: rgba(18,183,106,0.06); border: 1px solid rgba(18,183,106,0.2);
   font-size: 14px; color: var(--accent); text-align: center;
 }
 
-/* ====== Import/Export ====== */
+/* Gene checkbox chips */
+.gene-chip-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 6px 12px; border-radius: var(--radius-pill);
+  background: var(--surface); border: 1.5px solid var(--border);
+  color: var(--text2); font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all .15s; user-select: none;
+}
+.gene-chip-btn:active { transform: scale(.95); }
+.gene-chip-btn.selected {
+  background: rgba(18,183,106,0.1); border-color: var(--accent);
+  color: var(--accent); font-weight: 600;
+}
+.gene-chip-btn .abbr {
+  font-family: monospace; font-size: 10px; opacity: 0.6;
+}
+.gene-chip-btn.selected .abbr { opacity: 1; }
 .io-box {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 20px; text-align: center; margin: 12px 0;
+  background: var(--bg-deep); border: 1px solid var(--border);
+  border-radius: var(--radius-card); padding: 20px; text-align: center; margin: 12px 0;
+  box-shadow: var(--shadow-sm);
 }
 .io-box .icon { font-size: 36px; margin-bottom: 8px; }
-.io-box p { font-size: 13px; color: var(--text2); margin-bottom: 12px; }
+.io-box p { font-size: 13px; color: var(--text3); margin-bottom: 12px; }
 .io-box input[type="file"] { display: none; }
 
 /* ====== Toast ====== */
 .toast {
   position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
-  background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
-  border: 1px solid var(--border); border-radius: 12px;
+  background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-pill);
   padding: 10px 20px; font-size: 13px; color: var(--text);
   z-index: 999; opacity: 0; transition: opacity .3s;
-  pointer-events: none;
+  pointer-events: none; font-weight: 400; white-space: nowrap;
+  box-shadow: var(--shadow-md);
 }
 .toast.show { opacity: 1; }
 
 /* ====== Confirm Modal ====== */
 .modal-overlay {
   position: fixed; inset: 0; z-index: 200;
-  background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+  background: rgba(0,0,0,0.25); backdrop-filter: blur(2px);
   display: none; align-items: center; justify-content: center; padding: 20px;
 }
 .modal-overlay.show { display: flex; }
 .modal-box {
-  background: #1a1a24; border: 1px solid var(--border);
-  border-radius: 20px; padding: 24px; max-width: 320px; width: 100%;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius-card); padding: 24px; max-width: 320px; width: 100%;
   text-align: center;
 }
-.modal-box h3 { font-size: 17px; margin-bottom: 8px; }
-.modal-box p { font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 16px; }
+.modal-box h3 { font-size: 17px; font-weight: 500; margin-bottom: 8px; }
+.modal-box p { font-size: 14px; color: var(--text3); line-height: 1.6; margin-bottom: 16px; }
 .modal-btns { display: flex; gap: 8px; }
-.modal-btns .btn { padding: 10px; font-size: 14px; }
+.modal-btns .btn { padding: 8px 16px; font-size: 14px; }
+
+/* Back-to-top pill on scanner result buttons */
+#scannerResult .btn-primary,
+#scannerResult .btn-outline { display: inline-block; width: auto; }
 
 /* ====== Empty list prompt for first-time ====== */
 .getting-started {
   text-align: center; padding: 30px 0;
 }
 .getting-started .step {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 12px; padding: 14px; margin-bottom: 8px;
-  display: flex; align-items: center; gap: 12px;
+  background: var(--bg-deep); border: 1px solid var(--border);
+  border-radius: var(--radius-card); padding: 14px; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm);
 }
 .getting-started .step-num {
   width: 28px; height: 28px; border-radius: 50%;
-  background: rgba(110,204,138,0.15); color: var(--accent);
+  background: rgba(62,207,142,0.15); color: var(--accent);
   display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 700; flex-shrink: 0;
+  font-size: 13px; font-weight: 500; flex-shrink: 0;
 }
-.getting-started .step-text { text-align: left; font-size: 13px; }
-.getting-started .step-text strong { display: block; }
+.getting-started .step-text { text-align: left; font-size: 13px; color: var(--text3); }
+.getting-started .step-text strong { display: block; color: var(--text); }
 
 /* Responsive */
 @media (min-width: 500px) {
   .page { max-width: 480px; margin: 0 auto; }
 }
+
+/* Page transition */
+.page { animation: pageIn .25s ease-out; }
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Scan hint pulse */
+.scan-hint .icon { animation: pulse 2.5s ease-in-out infinite; }
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.7; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
 </style>
 </head>
 <body>
@@ -342,17 +458,14 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
     <h2 style="font-size:17px;font-weight:600;" id="formTitle">添加睫角</h2>
   </div>
   <div class="form-group">
-    <label class="form-label">名字 *</label>
-    <input class="form-input" id="fName" placeholder="如: 小橘子">
+    <label class="form-label">基因 * <span style="font-weight:400;text-transform:none;color:var(--text3);">（可多选）</span></label>
+    <div id="geneCheckboxes" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
   </div>
-  <div class="form-row">
-    <div class="form-group">
-      <label class="form-label">英文名</label>
-      <input class="form-input" id="fEname" placeholder="Little Orange">
-    </div>
-    <div class="form-group">
-      <label class="form-label">品系</label>
-      <input class="form-input" id="fMorph" placeholder="Red Harlequin">
+  <div class="form-group">
+    <label class="form-label">编号</label>
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--border);font-family:monospace;font-size:16px;font-weight:600;letter-spacing:1px;color:var(--accent);">
+      <span id="fIdPreview">选择基因后自动生成</span>
+      <input type="hidden" id="fId">
     </div>
   </div>
   <div class="form-row">
@@ -368,21 +481,11 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
       <label class="form-label">体重 (g)</label>
       <input class="form-input" id="fWeight" type="number" step="0.1" placeholder="35">
     </div>
-  </div>
-  <div class="form-row">
     <div class="form-group">
       <label class="form-label">破壳日期</label>
       <input class="form-input" id="fHatch" type="date">
     </div>
-    <div class="form-group">
-      <label class="form-label">编号 (可选)</label>
-      <input class="form-input" id="fId" placeholder="自动生成" disabled style="color:var(--text2);">
-    </div>
   </div>
-
-  <div class="form-section"><h3>🧬 基因信息</h3></div>
-  <div id="geneContainer"></div>
-  <button class="btn btn-outline" onclick="addGene()" style="padding:8px;font-size:13px;">+ 添加基因</button>
 
   <div class="form-section"><h3>👪 亲本</h3></div>
   <div class="form-row">
@@ -391,8 +494,20 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
       <input class="form-input" id="fDadName" placeholder="火焰">
     </div>
     <div class="form-group">
-      <label class="form-label">♂ 父亲品系</label>
+      <label class="form-label">♂ 父本基因</label>
       <input class="form-input" id="fDadMorph" placeholder="Flame">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">♂ 父亲照片</label>
+    <div class="parent-img-upload">
+      <div class="preview empty" id="dadPreview">📷</div>
+      <div class="img-info" id="dadImgInfo">未选择照片</div>
+      <div class="img-actions">
+        <button class="btn-add-img" onclick="document.getElementById('dadImgInput').click()">选择</button>
+        <button class="btn-remove-img" id="dadRemoveBtn" onclick="removeParentImg('dad')" style="display:none;">删除</button>
+      </div>
+      <input type="file" id="dadImgInput" accept="image/*" onchange="handleParentImg(event,'dad')" style="display:none;">
     </div>
   </div>
   <div class="form-row">
@@ -401,8 +516,20 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
       <input class="form-input" id="fMomName" placeholder="奶油">
     </div>
     <div class="form-group">
-      <label class="form-label">♀ 母亲品系</label>
+      <label class="form-label">♀ 母本基因</label>
       <input class="form-input" id="fMomMorph" placeholder="Cream">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">♀ 母亲照片</label>
+    <div class="parent-img-upload">
+      <div class="preview empty" id="momPreview">📷</div>
+      <div class="img-info" id="momImgInfo">未选择照片</div>
+      <div class="img-actions">
+        <button class="btn-add-img" onclick="document.getElementById('momImgInput').click()">选择</button>
+        <button class="btn-remove-img" id="momRemoveBtn" onclick="removeParentImg('mom')" style="display:none;">删除</button>
+      </div>
+      <input type="file" id="momImgInput" accept="image/*" onchange="handleParentImg(event,'mom')" style="display:none;">
     </div>
   </div>
 
@@ -413,7 +540,6 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 
   <div class="btn-group">
     <button class="btn btn-primary" onclick="saveGecko()">💾 保存</button>
-    <button class="btn btn-danger" id="btnDelete" onclick="deleteGecko()" style="display:none;">🗑️ 删除</button>
   </div>
 </div>
 
@@ -433,6 +559,11 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
     <div id="scanner"></div>
     <div id="scannerResult"></div>
     <button class="btn-stop" id="btnStopScanner" onclick="stopScanner()" style="display:none;">停止扫描</button>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">或者从相册选择二维码照片</div>
+      <button class="btn btn-outline" onclick="scanFromGallery()" style="width:auto;display:inline-block;padding:8px 20px;font-size:13px;">🖼️ 从相册选择</button>
+      <input type="file" id="galleryInput" accept="image/*" onchange="handleGalleryImage(event)" style="display:none;">
+    </div>
   </div>
 </div>
 
@@ -571,11 +702,10 @@ function showPage(name) {
 
 function switchTab(name) {
   if (name === 'scanner') {
-    // Don't auto-start scanner until page is shown
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('pageScanner').classList.add('active');
     document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
-    document.querySelector(`.tab-btn[data-page="${name}"]`).classList.add('active');
+    document.querySelector('.tab-btn[data-page="' + name + '"]').classList.add('active');
     setTimeout(() => startScanner(), 300);
     return;
   }
@@ -613,70 +743,155 @@ function renderList() {
   dbGetAll().then(all => {
     const filtered = all.filter(g => {
       if (!q) return true;
-      const searchText = `${g.name} ${g.englishName||''} ${g.morph||''} ${g.id} ${JSON.stringify(g.genes||[])}`.toLowerCase();
+      const searchText = (g.id + ' ' + (g.gene||'') + ' ' + (g.geneAbbrs||[]).join(' ') + ' ' + (g.notes||'')).toLowerCase();
       return searchText.includes(q);
     });
 
     if (filtered.length === 0 && all.length === 0) {
-      container.innerHTML = `
-        <div class="getting-started">
-          <div class="empty-state">
-            <div class="icon">🦎</div>
-            <p>还没有录入睫角数据<br>点击下方 <strong>「添加」</strong> 开始</p>
-          </div>
-          <div class="step">
-            <span class="step-num">1</span>
-            <div class="step-text"><strong>录入信息</strong>输入名字、性别、基因、父母本等</div>
-          </div>
-          <div class="step">
-            <span class="step-num">2</span>
-            <div class="step-text"><strong>生成二维码</strong>每只睫角自动生成专属二维码</div>
-          </div>
-          <div class="step">
-            <span class="step-num">3</span>
-            <div class="step-text"><strong>扫码识别</strong>用「扫码」功能快速调出信息</div>
-          </div>
-        </div>
-      `;
+      container.innerHTML = '<div class="getting-started"><div class="empty-state"><div class="icon">🦎</div><p>还没有录入睫角数据<br>点击下方 <strong>「添加」</strong> 开始</p></div><div class="step"><span class="step-num">1</span><div class="step-text"><strong>录入信息</strong>输入基因类型，自动生成编号</div></div><div class="step"><span class="step-num">2</span><div class="step-text"><strong>生成二维码</strong>每只睫角自动生成专属二维码</div></div><div class="step"><span class="step-num">3</span><div class="step-text"><strong>扫码识别</strong>用「扫码」功能快速调出信息</div></div></div>';
       return;
     }
     if (filtered.length === 0) {
-      container.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>没有找到匹配的睫角</p></div>`;
+      container.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>没有找到匹配的睫角</p></div>';
       return;
     }
 
-    container.innerHTML = `<div class="gecko-list">${
-      filtered.sort((a,b) => (b.createdAt||'') > (a.createdAt||'') ? 1 : -1).map(g => {
+    container.innerHTML = '<div class="gecko-list">' +
+      filtered.sort((a,b) => ((b.createdAt||'') > (a.createdAt||'') ? 1 : -1)).map(g => {
         const isF = g.sex === 'female';
-        const sexLabel = isF ? '♀' : g.sex === 'male' ? '♂' : '❓';
+        const sexLabel = isF ? '\u2640' : g.sex === 'male' ? '\u2642' : '\u2753';
         const sexCls = isF ? 'f' : g.sex === 'male' ? 'm' : '';
-        const parentInfo = [g.father?.name, g.mother?.name].filter(Boolean).join(' × ') || '';
-        return `<div class="gecko-item" onclick="showDetail('${g.id}')">
-          <div class="gecko-avatar ${sexCls}">🦎</div>
-          <div class="gecko-info">
-            <div class="g-name">${g.name} <span class="sex-tag ${sexCls}">${sexLabel}</span></div>
-            <div class="g-morph">${g.morph||'—'}</div>
-            <div class="g-meta">${parentInfo}${g.weight ? ' · '+g.weight+'g' : ''}</div>
-          </div>
-          <span class="gecko-arrow">›</span>
-        </div>`;
-      }).join('')
-    }</div>`;
+        const parentInfo = [g.father?.name, g.mother?.name].filter(Boolean).join(' \u00d7 ') || '';
+        return '<div class="gecko-item">' +
+          '<div class="gecko-avatar ' + sexCls + '" onclick="showDetail(\'' + g.id + '\')">\uD83E\uDD8E</div>' +
+          '<div class="gecko-info" onclick="showDetail(\'' + g.id + '\')">' +
+            '<div class="g-name">' + g.id + ' <span class="sex-tag ' + sexCls + '">' + sexLabel + '</span></div>' +
+            '<div class="g-morph">' + (g.gene || '\u2014') + '</div>' +
+            '<div class="g-meta">' + parentInfo + (g.weight ? ' \u00b7 ' + g.weight + 'g' : '') + '</div>' +
+          '</div>' +
+          '<button class="btn-icon" onclick="event.stopPropagation();deleteFromList(\'' + g.id + '\')" style="width:32px;height:32px;font-size:13px;color:var(--danger);flex-shrink:0;" title="删除">\uD83D\uDDD1\uFE0F</button>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  });
+}
+
+// ====== Gene ID System ======
+const GENE_OPTIONS = [
+  { label: '\u7d2b\u8c82 Sable', abbr: 'SB' },
+  { label: '\u5361\u5e03 Capp', abbr: 'CP' },
+  { label: '\u7f3a\u9ec4 Axanthic', abbr: 'AX' },
+  { label: '\u5976\u6cb9 Nongene', abbr: 'NG' },
+  { label: '\u8389\u8389\u767d Lw', abbr: 'LW' },
+];
+
+function initGeneCheckboxes() {
+  const container = document.getElementById('geneCheckboxes');
+  container.innerHTML = GENE_OPTIONS.map(g =>
+    '<div class="gene-chip-btn" data-abbr="' + g.abbr + '" onclick="toggleGene(this)">' +
+      g.label + ' <span class="abbr">' + g.abbr + '</span>' +
+    '</div>'
+  ).join('');
+}
+
+function toggleGene(el) {
+  el.classList.toggle('selected');
+  updateGenePreview();
+}
+
+function getSelectedGenes() {
+  const chips = document.querySelectorAll('#geneCheckboxes .gene-chip-btn.selected');
+  return Array.from(chips).map(el => ({
+    label: el.textContent.trim(),
+    abbr: el.dataset.abbr
+  }));
+}
+
+const ABBR_MAP = {
+  SB: 'Sb', CP: 'Cp', AX: 'Ax', NG: 'Ng', LW: 'Lw',
+};
+
+function computeGeneDisplay(selected) {
+  if (selected.length === 0) return { label: '', idAbbr: '' };
+
+  let abbrs = selected.map(g => g.abbr);
+  const hasNG = abbrs.includes('NG');
+  const hasLW = abbrs.includes('LW');
+  const hasCP = abbrs.includes('CP');
+
+  if (hasNG && abbrs.length > 1) {
+    const filtered = selected.filter(g => g.abbr !== 'NG');
+    return computeGeneDisplay(filtered);
+  }
+
+  if (abbrs.length === 1 && hasNG) {
+    return { label: '\u5976\u6cb9 Nongene', idAbbr: 'Ng' };
+  }
+
+  if (abbrs.length === 1 && hasLW) {
+    return { label: '\u8389\u8389\u767d Lw', idAbbr: 'Lw' };
+  }
+
+  if (abbrs.length === 1) {
+    const g = selected[0];
+    return { label: g.label, idAbbr: ABBR_MAP[g.abbr] || g.abbr };
+  }
+
+  if (hasCP && hasLW && abbrs.every(a => a === 'CP' || a === 'LW')) {
+    return { label: '\u6cd5\u5e03 Fabb', idAbbr: 'Fabb' };
+  }
+
+  if (hasLW && abbrs.length > 1) {
+    const nonLW = selected.filter(g => g.abbr !== 'LW');
+    const baseLabel = nonLW.map(g => g.label.split(' ')[0]).join('');
+    const nonLWAbbrs = nonLW.map(g => ABBR_MAP[g.abbr] || g.abbr).sort().join('');
+    return { label: baseLabel + '\u8389\u8389', idAbbr: nonLWAbbrs + 'Lw' };
+  }
+
+  const idAbbr = abbrs.sort().map(a => ABBR_MAP[a] || a).join('');
+  const label = selected.map(g => g.label).join(' + ');
+  return { label, idAbbr };
+}
+
+function updateGenePreview() {
+  const preview = document.getElementById('fIdPreview');
+  const selected = getSelectedGenes();
+  if (selected.length === 0) { preview.textContent = '\u9009\u62e9\u57fa\u56e0\u540e\u81ea\u52a8\u751f\u6210'; return; }
+
+  const display = computeGeneDisplay(selected);
+  const combinedAbbr = display.idAbbr;
+
+  preview.textContent = combinedAbbr + '???';
+  preview.style.opacity = '0.5';
+  generateIdFromAbbr(combinedAbbr).then(id => {
+    preview.textContent = id;
+    preview.style.opacity = '1';
+  });
+}
+
+function generateIdFromAbbr(abbr) {
+  if (!abbr) return Promise.resolve('');
+  return new Promise(resolve => {
+    dbGetAll().then(all => {
+      const existing = all.filter(g => g.id && g.id.startsWith(abbr))
+        .map(g => parseInt(g.id.replace(abbr,''), 10))
+        .filter(n => !isNaN(n));
+      const max = existing.length ? Math.max(...existing) : 0;
+      const num = String(max + 1).padStart(3, '0');
+      resolve(abbr + num);
+    });
   });
 }
 
 // ====== Form ======
 let editingId = null;
-let geneCount = 0;
 
 function resetForm() {
   editingId = null;
-  document.getElementById('formTitle').textContent = '添加睫角';
-  document.getElementById('btnDelete').style.display = 'none';
+  document.getElementById('formTitle').textContent = '\u6dfb\u52a0\u776b\u89d2';
   document.getElementById('fId').value = '';
-  document.getElementById('fName').value = '';
-  document.getElementById('fEname').value = '';
-  document.getElementById('fMorph').value = '';
+  document.getElementById('fIdPreview').textContent = '\u9009\u62e9\u57fa\u56e0\u540e\u81ea\u52a8\u751f\u6210';
+  document.querySelectorAll('#geneCheckboxes .gene-chip-btn').forEach(el => el.classList.remove('selected'));
   document.getElementById('fSex').value = 'female';
   document.getElementById('fWeight').value = '';
   document.getElementById('fHatch').value = '';
@@ -685,33 +900,66 @@ function resetForm() {
   document.getElementById('fMomName').value = '';
   document.getElementById('fMomMorph').value = '';
   document.getElementById('fNotes').value = '';
-  document.getElementById('geneContainer').innerHTML = '';
-  geneCount = 0;
+  ['dad','mom'].forEach(p => {
+    document.getElementById(p+'Preview').src = '';
+    document.getElementById(p+'Preview').className = 'preview empty';
+    document.getElementById(p+'Preview').textContent = '\uD83D\uDCF7';
+    document.getElementById(p+'ImgInfo').textContent = '\u672a\u9009\u62e9\u7167\u7247';
+    document.getElementById(p+'RemoveBtn').style.display = 'none';
+    window['_'+p+'ImgData'] = null;
+  });
 }
 
-function addGene(name, value) {
-  const container = document.getElementById('geneContainer');
-  const div = document.createElement('div');
-  div.className = 'gene-entry';
-  div.innerHTML = `<div class="gene-row">
-    <input class="form-input gene-name" placeholder="基因名 (如: Dilute)" value="${name||''}">
-    <input class="form-input gene-val" placeholder="基因型 (如: d/d)" value="${value||''}">
-    <button class="btn-remove-gene" onclick="this.closest('.gene-entry').remove()">×</button>
-  </div>`;
-  container.appendChild(div);
-  geneCount++;
+// ====== Parent Image Handling ======
+function handleParentImg(event, parent) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { toast('\u26A0\uFE0F \u8BF7\u9009\u62E9\u56FE\u7247\u6587\u4EF6'); return; }
+  if (file.size > 5 * 1024 * 1024) { toast('\u26A0\uFE0F \u56FE\u7247\u4E0D\u80FD\u8D85\u8FC75MB'); return; }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    window['_'+parent+'ImgData'] = dataUrl;
+    const preview = document.getElementById(parent+'Preview');
+    preview.src = dataUrl;
+    preview.className = 'preview';
+    preview.textContent = '';
+    document.getElementById(parent+'ImgInfo').textContent = file.name;
+    document.getElementById(parent+'RemoveBtn').style.display = 'inline-block';
+    toast('\u2705 \u5DF2\u9009\u62E9\u7167\u7247');
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function removeParentImg(parent) {
+  window['_'+parent+'ImgData'] = null;
+  const preview = document.getElementById(parent+'Preview');
+  preview.src = '';
+  preview.className = 'preview empty';
+  preview.textContent = '\uD83D\uDCF7';
+  document.getElementById(parent+'ImgInfo').textContent = '\u672A\u9009\u62E9\u7167\u7247';
+  document.getElementById(parent+'RemoveBtn').style.display = 'none';
+  toast('\u5DF2\u5220\u9664\u7167\u7247');
 }
 
 function loadForm(id) {
   dbGet(id).then(g => {
-    if (!g) { toast('未找到该睫角'); return; }
+    if (!g) { toast('\u672A\u627E\u5230\u8BE5\u776B\u89D2'); return; }
     editingId = id;
-    document.getElementById('formTitle').textContent = '编辑 ' + g.name;
-    document.getElementById('btnDelete').style.display = 'block';
+    document.getElementById('formTitle').textContent = '\u7F16\u8F91 ' + g.id;
     document.getElementById('fId').value = g.id;
-    document.getElementById('fName').value = g.name || '';
-    document.getElementById('fEname').value = g.englishName || '';
-    document.getElementById('fMorph').value = g.morph || '';
+    document.getElementById('fIdPreview').textContent = g.id;
+    document.getElementById('fIdPreview').style.opacity = '1';
+    document.querySelectorAll('#geneCheckboxes .gene-chip-btn').forEach(el => el.classList.remove('selected'));
+    const savedAbbrs = g.geneAbbrs || [];
+    if (savedAbbrs.length) {
+      savedAbbrs.forEach(abbr => {
+        const chip = document.querySelector('#geneCheckboxes .gene-chip-btn[data-abbr="' + abbr + '"]');
+        if (chip) chip.classList.add('selected');
+      });
+    }
     document.getElementById('fSex').value = g.sex || 'female';
     document.getElementById('fWeight').value = g.weight || '';
     document.getElementById('fHatch').value = g.hatchDate || '';
@@ -720,70 +968,87 @@ function loadForm(id) {
     document.getElementById('fMomName').value = g.mother?.name || '';
     document.getElementById('fMomMorph').value = g.mother?.morph || '';
     document.getElementById('fNotes').value = g.notes || '';
-    document.getElementById('geneContainer').innerHTML = '';
-    geneCount = 0;
-    if (g.genes && g.genes.length) {
-      g.genes.forEach(ge => addGene(ge.name, ge.value));
-    }
+    ['dad','mom'].forEach(p => {
+      const key = p === 'dad' ? 'father' : 'mother';
+      const imgData = g[key]?.image || null;
+      window['_'+p+'ImgData'] = imgData;
+      if (imgData) {
+        const pre = document.getElementById(p+'Preview');
+        pre.src = imgData;
+        pre.className = 'preview';
+        document.getElementById(p+'ImgInfo').textContent = '\u5DF2\u9009\u7167\u7247';
+        document.getElementById(p+'RemoveBtn').style.display = 'inline-block';
+      }
+    });
     showPage('form');
     document.querySelectorAll('.tab-btn').forEach(t => t.classList.toggle('active', t.dataset.page === 'form'));
   });
 }
 
 function collectForm() {
-  const genes = [];
-  document.querySelectorAll('.gene-entry').forEach(el => {
-    const name = el.querySelector('.gene-name').value.trim();
-    const val = el.querySelector('.gene-val').value.trim();
-    if (name) genes.push({ name, value: val || '—' });
-  });
-
+  const selected = getSelectedGenes();
+  const display = computeGeneDisplay(selected);
   return {
-    name: document.getElementById('fName').value.trim(),
-    englishName: document.getElementById('fEname').value.trim(),
-    morph: document.getElementById('fMorph').value.trim(),
+    geneAbbrs: selected.map(g => g.abbr),
+    gene: display.label,
     sex: document.getElementById('fSex').value,
     weight: document.getElementById('fWeight').value.trim(),
     hatchDate: document.getElementById('fHatch').value,
-    genes: genes,
+    notes: document.getElementById('fNotes').value.trim(),
     father: {
       name: document.getElementById('fDadName').value.trim(),
-      morph: document.getElementById('fDadMorph').value.trim()
+      morph: document.getElementById('fDadMorph').value.trim(),
+      image: window._dadImgData || undefined
     },
     mother: {
       name: document.getElementById('fMomName').value.trim(),
-      morph: document.getElementById('fMomMorph').value.trim()
+      morph: document.getElementById('fMomMorph').value.trim(),
+      image: window._momImgData || undefined
     },
-    notes: document.getElementById('fNotes').value.trim()
   };
 }
 
-function saveGecko() {
+async function saveGecko() {
   const data = collectForm();
-  if (!data.name) { toast('⚠️ 请输入名字'); document.getElementById('fName').focus(); return; }
+  if (!data.gene) { toast('\u26A0\uFE0F \u8BF7\u9009\u62E9\u81F3\u5C11\u4E00\u4E2A\u57FA\u56E0'); return; }
 
-  const id = editingId || uuid();
+  let id = editingId;
+  if (!id) {
+    const selected = getSelectedGenes();
+    const display = computeGeneDisplay(selected);
+    id = await generateIdFromAbbr(display.idAbbr);
+  }
+
   const gecko = {
     id,
     ...data,
+    name: id,
     createdAt: editingId ? undefined : new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
-  if (!gecko.englishName) delete gecko.englishName;
 
   dbPut(gecko).then(() => {
-    toast('✅ 保存成功！');
+    toast('\u2705 \u4FDD\u5B58\u6210\u529F\uFF01\u7F16\u53F7: ' + id);
     resetForm();
     showPage('list');
     renderList();
-  }).catch(e => { toast('❌ 保存失败: '+e.message); });
+  }).catch(e => { toast('\u274C \u4FDD\u5B58\u5931\u8D25: '+e.message); });
+}
+
+function deleteFromList(id) {
+  showModal('\u786E\u8BA4\u5220\u9664', '\u786E\u5B9A\u5220\u9664\u7F16\u53F7 ' + id + ' \u5417\uFF1F\u6B64\u64CD\u4F5C\u4E0D\u53EF\u6062\u590D\u3002', () => {
+    dbDelete(id).then(() => {
+      toast('\uD83D\uDDD1\uFE0F \u5DF2\u5220\u9664 ' + id);
+      renderList();
+    });
+  });
 }
 
 function deleteGecko() {
   if (!editingId) return;
-  showModal('确认删除', '删除后数据不可恢复，确定删除 ' + document.getElementById('fName').value + ' 吗？', () => {
+  showModal('\u786E\u8BA4\u5220\u9664', '\u5220\u9664\u540E\u6570\u636E\u4E0D\u53EF\u6062\u590D\uFF0C\u786E\u5B9A\u5220\u9664\u5417\uFF1F', () => {
     dbDelete(editingId).then(() => {
-      toast('🗑️ 已删除');
+      toast('\uD83D\uDDD1\uFE0F \u5DF2\u5220\u9664');
       resetForm();
       showPage('list');
       renderList();
@@ -795,83 +1060,51 @@ function deleteGecko() {
 function showDetail(id) {
   const container = document.getElementById('detailContent');
   dbGet(id).then(g => {
-    if (!g) { toast('未找到数据'); return; }
+    if (!g) { toast('\u672A\u627E\u5230\u6570\u636E'); return; }
     const isF = g.sex === 'female';
     const sexCls = isF ? 'f' : g.sex === 'male' ? 'm' : '';
-    const sexLabel = isF ? '♀ 雌性' : g.sex === 'male' ? '♂ 雄性' : '❓ 未知';
+    const sexLabel = isF ? '\u2640 \u96CC\u6027' : g.sex === 'male' ? '\u2642 \u96C4\u6027' : '\u2753 \u672A\u77E5';
 
-    const genesHtml = (g.genes||[]).map(ge =>
-      `<div class="gene-chip"><span class="g-name">${ge.name}</span><span class="g-val">${ge.value}</span></div>`
-    ).join('') || '<div style="color:var(--text2);font-size:13px;">未记录</div>';
-
-    container.innerHTML = `
-      <div class="detail-header">
-        <button class="back-btn" onclick="showPage('list')">←</button>
-        <div class="detail-avatar ${sexCls}">🦎</div>
-        <div class="detail-title">
-          <h2>${g.name}</h2>
-          <div class="sub">${g.englishName||''}${g.englishName ? ' · ' : ''}编号 ${g.id}</div>
-          <div class="morph-badge">${g.morph||'—'}</div>
-        </div>
-      </div>
-
-      <div class="detail-grid">
-        <div class="detail-cell">
-          <div class="label">性别</div>
-          <div class="value" style="color:${isF ? 'var(--female)' : g.sex==='male' ? 'var(--male)' : 'var(--text2)'}">${sexLabel}</div>
-        </div>
-        <div class="detail-cell">
-          <div class="label">体重</div>
-          <div class="value">${g.weight ? g.weight+'g' : '—'}</div>
-        </div>
-        <div class="detail-cell">
-          <div class="label">破壳日期</div>
-          <div class="value">${g.hatchDate||'—'}</div>
-        </div>
-        <div class="detail-cell">
-          <div class="label">已录入</div>
-          <div class="value" style="font-size:12px;">${g.createdAt ? new Date(g.createdAt).toLocaleDateString('zh-CN') : '—'}</div>
-        </div>
-      </div>
-
-      <div class="detail-section"><h3>🧬 基因</h3>${genesHtml}</div>
-
-      <div class="detail-section"><h3>👪 亲本</h3>
-        <div class="parents-grid-detail">
-          <div class="parent-card-detail">
-            <div class="role">♂ Father</div>
-            <div class="p-name">${g.father?.name||'—'}</div>
-            <div class="p-morph">${g.father?.morph||''}</div>
-          </div>
-          <div class="parent-card-detail">
-            <div class="role">♀ Mother</div>
-            <div class="p-name">${g.mother?.name||'—'}</div>
-            <div class="p-morph">${g.mother?.morph||''}</div>
-          </div>
-        </div>
-      </div>
-
-      ${g.notes ? `<div class="detail-section"><h3>📝 备注</h3><div class="detail-note">${g.notes}</div></div>` : ''}
-
-      <div class="qr-section">
-        <h3>📱 专属二维码</h3>
-        <div id="qrcode"></div>
-        <div class="qr-tip">扫码可查看此睫角完整信息</div>
-        <button class="qr-share-btn" onclick="shareQR('${g.id}','${g.name}')">📤 分享二维码</button>
-      </div>
-
-      <div class="btn-group" style="margin-top:12px;">
-        <button class="btn btn-outline" onclick="loadForm('${g.id}')">✏️ 编辑</button>
-      </div>
-    `;
+    container.innerHTML = '<div class="detail-header">' +
+        '<button class="back-btn" onclick="showPage(\'list\')">\u2190</button>' +
+        '<div class="detail-avatar ' + sexCls + '">\uD83E\uDD8E</div>' +
+        '<div class="detail-title">' +
+          '<h2 style="font-family:monospace;letter-spacing:1px;">' + g.id + '</h2>' +
+          '<div class="sub">' + (g.notes||'') + '</div>' +
+          '<div class="morph-badge">' + (g.gene || '\u2014') + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="detail-grid">' +
+        '<div class="detail-cell"><div class="label">\u6027\u522B</div><div class="value" style="color:' + (isF ? 'var(--female)' : g.sex==='male' ? 'var(--male)' : 'var(--text2)') + '">' + sexLabel + '</div></div>' +
+        '<div class="detail-cell"><div class="label">\u4F53\u91CD</div><div class="value">' + (g.weight ? g.weight+'g' : '\u2014') + '</div></div>' +
+        '<div class="detail-cell"><div class="label">\u7834\u58F3\u65E5\u671F</div><div class="value">' + (g.hatchDate||'\u2014') + '</div></div>' +
+        '<div class="detail-cell"><div class="label">\u5DF2\u5F55\u5165</div><div class="value" style="font-size:12px;">' + (g.createdAt ? new Date(g.createdAt).toLocaleDateString('zh-CN') : '\u2014') + '</div></div>' +
+      '</div>' +
+      '<div class="detail-section"><h3>\uD83D\uDC6A \u4EB2\u672C</h3><div class="parents-grid-detail">' +
+        '<div class="parent-card-detail"><div class="role">\u2642 Father</div>' +
+          (g.father?.image ? '<img class="parent-photo" src="' + g.father.image + '" alt="\u7236\u4EB2">' : '<div class="parent-photo-placeholder">\uD83E\uDD8E</div>') +
+          '<div class="p-name">' + (g.father?.name||'\u2014') + '</div><div class="p-morph">' + (g.father?.morph||'') + '</div></div>' +
+        '<div class="parent-card-detail"><div class="role">\u2640 Mother</div>' +
+          (g.mother?.image ? '<img class="parent-photo" src="' + g.mother.image + '" alt="\u6BCD\u4EB2">' : '<div class="parent-photo-placeholder">\uD83E\uDD8E</div>') +
+          '<div class="p-name">' + (g.mother?.name||'\u2014') + '</div><div class="p-morph">' + (g.mother?.morph||'') + '</div></div>' +
+      '</div></div>' +
+      (g.notes ? '<div class="detail-section"><h3>\uD83D\uDCDD \u5907\u6CE8</h3><div class="detail-note">' + g.notes + '</div></div>' : '') +
+      '<div class="qr-section"><h3>\uD83D\uDCF1 \u4E13\u5C5E\u4E8C\u7EF4\u7801</h3><div id="qrcode"></div>' +
+        '<div class="qr-tip">\u626B\u7801\u53EF\u67E5\u770B\u6B64\u776B\u89D2\u5B8C\u6574\u4FE1\u606F</div>' +
+        '<div class="qr-actions">' +
+          '<button onclick="saveQRImage(\'' + g.id + '\',\'' + g.name + '\')">\uD83D\uDCBE \u4FDD\u5B58\u56FE\u7247</button>' +
+          '<button class="btn-save" onclick="shareQR(\'' + g.id + '\',\'' + g.name + '\')">\uD83D\uDCE4 \u5206\u4EAB\u94FE\u63A5</button>' +
+        '</div></div>' +
+      '<div class="btn-group" style="margin-top:12px;">' +
+        '<button class="btn btn-outline" onclick="loadForm(\'' + g.id + '\')">\u270F\uFE0F \u7F16\u8F91</button>' +
+      '</div>';
     showPage('detail');
 
-    // Generate QR
     setTimeout(() => {
-      const container = document.getElementById('qrcode');
-      container.innerHTML = '';
+      const c = document.getElementById('qrcode');
+      c.innerHTML = '';
       const url = window.location.href.split('#')[0].split('?')[0] + '?gecko=' + g.id;
-      new QRCode(container, {
+      new QRCode(c, {
         text: url,
         width: 160, height: 160,
         colorDark: '#0a0a0f',
@@ -882,18 +1115,80 @@ function showDetail(id) {
   });
 }
 
-// ====== QR Share ======
+// ====== QR Share & Save ======
 function shareQR(id, name) {
   const url = window.location.href.split('#')[0].split('?')[0] + '?gecko=' + id;
   if (navigator.share) {
-    navigator.share({ title: name, text: `${name} 的睫角身份卡片`, url: url });
+    navigator.share({ title: id, text: id + ' \u7684\u776B\u89D2\u8EAB\u4EFD\u5361\u7247', url: url });
   } else {
-    navigator.clipboard.writeText(url).then(() => toast('🔗 链接已复制到剪贴板')).catch(() => toast(url));
+    navigator.clipboard.writeText(url).then(() => toast('\uD83D\uDD17 \u94FE\u63A5\u5DF2\u590D\u5236\u5230\u526A\u8D34\u677F')).catch(() => toast(url));
   }
+}
+
+function saveQRImage(id, name) {
+  const qrEl = document.querySelector('#qrcode canvas') || document.querySelector('#qrcode img');
+  if (!qrEl) { toast('\u26A0\uFE0F \u4E8C\u7EF4\u7801\u5C1A\u672A\u751F\u6210'); return; }
+
+  const canvas = document.createElement('canvas');
+  const qrCanvas = qrEl.tagName === 'CANVAS' ? qrEl : null;
+  let qrSize = 160;
+  if (qrCanvas) qrSize = qrCanvas.width;
+
+  const padding = 30;
+  const nameHeight = 50;
+  const totalW = qrSize + padding * 2;
+  const totalH = qrSize + padding * 2 + nameHeight;
+
+  canvas.width = totalW;
+  canvas.height = totalH;
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.roundRect(0, 0, totalW, totalH, 16);
+  ctx.fill();
+
+  if (qrCanvas) {
+    ctx.drawImage(qrCanvas, padding, padding, qrSize, qrSize);
+  }
+
+  ctx.fillStyle = '#0a0a0f';
+  ctx.font = 'bold 18px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(name, totalW / 2, totalH - 14);
+
+  const link = document.createElement('a');
+  link.download = name + '_\u4E8C\u7EF4\u7801.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  toast('\u2705 \u4E8C\u7EF4\u7801\u5DF2\u4FDD\u5B58');
 }
 
 // ====== Scanner ======
 let html5QrCode = null;
+let galleryScanner = null;
+
+function scanFromGallery() {
+  document.getElementById('galleryInput').click();
+}
+
+function handleGalleryImage(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  stopScanner();
+  document.getElementById('scannerResult').innerHTML = '<div style="color:var(--text2);">\uD83D\uDD0D \u8BC6\u522B\u4E2D...</div>';
+
+  if (!galleryScanner) {
+    galleryScanner = new Html5Qrcode("scanner");
+  }
+  galleryScanner.scanFile(file, true)
+    .then(onScanSuccess)
+    .catch(err => {
+      document.getElementById('scannerResult').innerHTML =
+        '<div style="color:#ff6060;">\u26A0\uFE0F \u672A\u8BC6\u522B\u5230\u4E8C\u7EF4\u7801<br><span style="font-size:12px;">\u8BF7\u786E\u4FDD\u56FE\u7247\u6E05\u6670\u3001\u4E8C\u7EF4\u7801\u5B8C\u6574</span></div>' +
+        '<button class="btn btn-outline" onclick="scanFromGallery()" style="margin-top:8px;padding:8px 20px;width:auto;display:inline-block;">\u91CD\u65B0\u9009\u62E9</button>';
+    });
+}
 
 function startScanner() {
   if (html5QrCode) return;
@@ -908,23 +1203,21 @@ function startScanner() {
       onScanSuccess,
       () => {}
     ).catch(e => {
-      document.getElementById('scannerResult').innerHTML = `<div style="color:#ff6060;">⚠️ 无法打开相机: ${e.message}</div>`;
+      document.getElementById('scannerResult').innerHTML = '<div style="color:#ff6060;">\u26A0\uFE0F \u65E0\u6CD5\u6253\u5F00\u76F8\u673A: ' + e.message + '</div>';
       document.getElementById('btnStopScanner').style.display = 'none';
     });
   } catch(e) {
-    document.getElementById('scannerResult').innerHTML = `<div style="color:#ff6060;">⚠️ 扫码库加载失败: ${e.message}</div>`;
+    document.getElementById('scannerResult').innerHTML = '<div style="color:#ff6060;">\u26A0\uFE0F \u626B\u7801\u5E93\u52A0\u8F7D\u5931\u8D25: ' + e.message + '</div>';
   }
 }
 
 function onScanSuccess(decodedText) {
   stopScanner();
-  // Extract gecko ID from URL
   let geckoId = null;
   try {
     const url = new URL(decodedText);
     geckoId = url.searchParams.get('gecko');
   } catch {
-    // Maybe it's just a raw ID
     if (decodedText.startsWith('g')) geckoId = decodedText;
   }
 
@@ -932,19 +1225,19 @@ function onScanSuccess(decodedText) {
     dbGet(geckoId).then(g => {
       if (g) {
         document.getElementById('scannerResult').innerHTML =
-          `<div style="color:var(--accent);font-size:15px;">✅ 识别成功！${g.name}</div>
-           <button class="btn btn-primary" onclick="showDetail('${g.id}')" style="margin-top:8px;padding:8px 20px;width:auto;display:inline-block;">查看详情</button>`;
-        toast('✅ 已识别: ' + g.name);
+          '<div style="color:var(--accent);font-size:15px;">\u2705 \u8BC6\u522B\u6210\u529F\uFF01' + g.id + '</div>' +
+          '<button class="btn btn-primary" onclick="showDetail(\'' + g.id + '\')" style="margin-top:8px;padding:8px 20px;width:auto;display:inline-block;">\u67E5\u770B\u8BE6\u60C5</button>';
+        toast('\u2705 \u5DF2\u8BC6\u522B: ' + g.id);
       } else {
         document.getElementById('scannerResult').innerHTML =
-          `<div style="color:#ff6060;">⚠️ 未找到编号 "${geckoId}" 的睫角数据</div>
-           <button class="btn btn-outline" onclick="startScanner()" style="margin-top:8px;padding:8px 20px;width:auto;display:inline-block;">重新扫码</button>`;
+          '<div style="color:#ff6060;">\u26A0\uFE0F \u672A\u627E\u5230\u7F16\u53F7 "' + geckoId + '" \u7684\u776B\u89D2\u6570\u636E</div>' +
+          '<button class="btn btn-outline" onclick="startScanner()" style="margin-top:8px;padding:8px 20px;width:auto;display:inline-block;">\u91CD\u65B0\u626B\u7801</button>';
       }
     });
   } else {
     document.getElementById('scannerResult').innerHTML =
-      `<div style="color:#ff6060;">⚠️ 无效二维码，未包含睫角信息</div>
-       <button class="btn btn-outline" onclick="startScanner()" style="margin-top:8px;padding:8px 20px;width:auto;display:inline-block;">重新扫码</button>`;
+      '<div style="color:#ff6060;">\u26A0\uFE0F \u65E0\u6548\u4E8C\u7EF4\u7801\uFF0C\u672A\u5305\u542B\u776B\u89D2\u4FE1\u606F</div>' +
+      '<button class="btn btn-outline" onclick="startScanner()" style="margin-top:8px;padding:8px 20px;width:auto;display:inline-block;">\u91CD\u65B0\u626B\u7801</button>';
   }
 }
 
@@ -954,22 +1247,27 @@ function stopScanner() {
     html5QrCode.clear();
     html5QrCode = null;
   }
+  if (galleryScanner) {
+    try { galleryScanner.stop(); } catch(e) {}
+    galleryScanner.clear();
+    galleryScanner = null;
+  }
   document.getElementById('btnStopScanner').style.display = 'none';
 }
 
 // ====== Data Import/Export ======
 function exportData() {
   dbGetAll().then(all => {
-    if (all.length === 0) { toast('暂无数据可导出'); return; }
+    if (all.length === 0) { toast('\u6682\u65E0\u6570\u636E\u53EF\u5BFC\u51FA'); return; }
     const data = JSON.stringify(all, null, 2);
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `睫角数据_${new Date().toISOString().slice(0,10)}.json`;
+    a.download = '\u776B\u89D2\u6570\u636E_' + new Date().toISOString().slice(0,10) + '.json';
     a.click();
     URL.revokeObjectURL(url);
-    toast('✅ 导出成功');
+    toast('\u2705 \u5BFC\u51FA\u6210\u529F');
   });
 }
 
@@ -980,15 +1278,15 @@ function importData(event) {
   reader.onload = e => {
     try {
       const data = JSON.parse(e.target.result);
-      if (!Array.isArray(data)) throw new Error('格式错误');
+      if (!Array.isArray(data)) throw new Error('\u683C\u5F0F\u9519\u8BEF');
       let count = 0;
       Promise.all(data.map(g => dbPut(g).then(() => count++)))
         .then(() => {
-          toast(`✅ 导入成功！共 ${count} 条`);
+          toast('\u2705 \u5BFC\u5165\u6210\u529F\uFF01\u5171 ' + count + ' \u6761');
           renderList();
         });
     } catch(err) {
-      toast('❌ 导入失败: ' + err.message);
+      toast('\u274C \u5BFC\u5165\u5931\u8D25: ' + err.message);
     }
   };
   reader.readAsText(file);
@@ -996,9 +1294,9 @@ function importData(event) {
 }
 
 function confirmClear() {
-  showModal('⚠️ 清除全部数据', '此操作不可恢复！将删除所有睫角信息。确定继续？', () => {
+  showModal('\u26A0\uFE0F \u6E05\u9664\u5168\u90E8\u6570\u636E', '\u6B64\u64CD\u4F5C\u4E0D\u53EF\u6062\u590D\uFF01\u5C06\u5220\u9664\u6240\u6709\u776B\u89D2\u4FE1\u606F\u3002\u786E\u5B9A\u7EE7\u7EED\uFF1F', () => {
     dbClear().then(() => {
-      toast('已清除全部数据');
+      toast('\u5DF2\u6E05\u9664\u5168\u90E8\u6570\u636E');
       renderList();
     });
   });
@@ -1006,9 +1304,9 @@ function confirmClear() {
 
 // ====== Init ======
 openDB().then(() => {
+  initGeneCheckboxes();
   renderList();
 
-  // Check URL for ?gecko=ID (opened from QR scan)
   const params = new URLSearchParams(window.location.search);
   const geckoId = params.get('gecko');
   if (geckoId) {
@@ -1018,7 +1316,7 @@ openDB().then(() => {
   }
 }).catch(e => {
   document.getElementById('listContent').innerHTML =
-    `<div class="empty-state" style="color:#ff6060;"><div class="icon">⚠️</div><p>数据库初始化失败: ${e.message}</p></div>`;
+    '<div class="empty-state" style="color:#ff6060;"><div class="icon">\u26A0\uFE0F</div><p>\u6570\u636E\u5E93\u521D\u59CB\u5316\u5931\u8D25: ' + e.message + '</p></div>';
 });
 </script>
 </body>
