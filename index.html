@@ -1191,7 +1191,7 @@ function showDetail(id) {
     const sexLabel = isF ? '\u2640 \u96CC\u6027' : g.sex === 'male' ? '\u2642 \u96C4\u6027' : '\u2753 \u672A\u77E5';
 
     const geckoPhotoHtml = g.image
-      ? '<img src="' + g.image + '" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid ' + (isF ? 'rgba(228,120,154,0.25)' : g.sex===\'male\' ? 'rgba(90,159,212,0.25)' : 'var(--border)') + ';flex-shrink:0;">'
+      ? '<img src="' + g.image + '" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid ' + (isF ? 'rgba(228,120,154,0.25)' : g.sex==='male' ? 'rgba(90,159,212,0.25)' : 'var(--border)') + ';flex-shrink:0;">'
       : '<div class="detail-avatar ' + sexCls + '">\uD83E\uDD8E</div>';
     container.innerHTML = '<div class="detail-header">' +
         '<button class="back-btn" onclick="showPage(\'list\')">\u2190</button>' +
