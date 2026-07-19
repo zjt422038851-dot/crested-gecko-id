@@ -349,6 +349,51 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
   font-family: monospace; font-size: 10px; opacity: 0.6;
 }
 .gene-chip-btn.selected .abbr { opacity: 1; }
+
+/* Gene selector (dropdown style for parent genes) */
+.gene-selector {
+  position: relative;
+  cursor: pointer;
+}
+.gene-selector-trigger {
+  width: 100%; padding: 10px 12px; border-radius: var(--radius);
+  background: var(--bg-deep); border: 1px solid var(--border);
+  color: var(--text2); font-size: 14px; font-weight: 400;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: border .15s;
+  box-shadow: var(--shadow-sm);
+}
+.gene-selector-trigger:focus, .gene-selector.open .gene-selector-trigger {
+  border-color: var(--accent); box-shadow: 0 0 0 3px rgba(18,183,106,0.1);
+  outline: none;
+}
+.gene-selector-trigger .arrow {
+  font-size: 10px; color: var(--text3); transition: transform .2s;
+}
+.gene-selector.open .gene-selector-trigger .arrow {
+  transform: rotate(180deg);
+}
+.gene-selector-trigger .selected-label {
+  color: var(--text); font-weight: 500;
+}
+.gene-selector-trigger .placeholder {
+  color: var(--text3);
+}
+.gene-selector-dropdown {
+  display: none;
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 50;
+  background: var(--bg-deep); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 6px;
+  box-shadow: var(--shadow-md);
+  max-height: 220px; overflow-y: auto;
+}
+.gene-selector.open .gene-selector-dropdown {
+  display: flex; flex-wrap: wrap; gap: 4px;
+}
+.gene-selector-dropdown .gene-chip-btn {
+  flex: 0 0 auto;
+}
+
 .io-box {
   background: var(--bg-deep); border: 1px solid var(--border);
   border-radius: var(--radius-card); padding: 20px; text-align: center; margin: 12px 0;
@@ -508,7 +553,13 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
     </div>
     <div class="form-group">
       <label class="form-label">♂ 父本基因</label>
-      <div id="dadGeneChips" style="display:flex;flex-wrap:nowrap;gap:4px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;"></div>
+      <div class="gene-selector" id="dadGeneSelector" tabindex="0">
+        <div class="gene-selector-trigger" onclick="toggleGeneDropdown('dadGeneSelector')">
+          <span class="placeholder" id="dadGeneLabel">点击选择父本基因</span>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="gene-selector-dropdown" id="dadGeneChips"></div>
+      </div>
     </div>
   </div>
   <div class="form-group">
@@ -530,7 +581,13 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
     </div>
     <div class="form-group">
       <label class="form-label">♀ 母本基因</label>
-      <div id="momGeneChips" style="display:flex;flex-wrap:nowrap;gap:4px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;"></div>
+      <div class="gene-selector" id="momGeneSelector" tabindex="0">
+        <div class="gene-selector-trigger" onclick="toggleGeneDropdown('momGeneSelector')">
+          <span class="placeholder" id="momGeneLabel">点击选择母本基因</span>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="gene-selector-dropdown" id="momGeneChips"></div>
+      </div>
     </div>
   </div>
   <div class="form-group">
@@ -811,24 +868,54 @@ function initGeneCheckboxes() {
       g.label + ' <span class="abbr">' + g.abbr + '</span>' +
     '</div>'
   ).join('');
-  // Init parent gene chips (single-select)
-  ['dadGeneChips','momGeneChips'].forEach(id => {
-    const el = document.getElementById(id);
+  // Init parent gene selectors (dropdown-style)
+  ['dadGeneSelector','momGeneSelector'].forEach(selId => {
+    const chipsId = selId.replace('Selector', 'Chips');
+    const labelId = selId.replace('Selector', 'GeneLabel');
+    const el = document.getElementById(chipsId);
     if (!el) return;
     el.innerHTML = '<div class="gene-chip-btn" data-abbr="">— 无</div>' +
       GENE_OPTIONS.map(g =>
-        '<div class="gene-chip-btn" data-abbr="' + g.abbr + '" onclick="toggleParentGene(this,\'' + id + '\')">' +
+        '<div class="gene-chip-btn" data-abbr="' + g.abbr + '" onclick="toggleParentGene(this,\'' + selId + '\')">' +
           g.label + ' <span class="abbr">' + g.abbr + '</span>' +
         '</div>'
       ).join('');
   });
 }
 
-function toggleParentGene(el, containerId) {
-  const chips = document.querySelectorAll('#' + containerId + ' .gene-chip-btn');
+function toggleGeneDropdown(selId) {
+  const sel = document.getElementById(selId);
+  const isOpen = sel.classList.contains('open');
+  // Close all other dropdowns
+  document.querySelectorAll('.gene-selector.open').forEach(s => s.classList.remove('open'));
+  if (!isOpen) sel.classList.add('open');
+}
+
+function toggleParentGene(el, selId) {
+  const chipsId = selId.replace('Selector', 'Chips');
+  const labelId = selId.replace('Selector', 'GeneLabel');
+  const chips = document.querySelectorAll('#' + chipsId + ' .gene-chip-btn');
   chips.forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
+  // Update trigger label
+  const label = document.getElementById(labelId);
+  if (el.dataset.abbr) {
+    label.textContent = el.textContent.trim();
+    label.className = 'selected-label';
+  } else {
+    label.textContent = '— 无';
+    label.className = 'placeholder';
+  }
+  // Close dropdown
+  document.getElementById(selId).classList.remove('open');
 }
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.gene-selector')) {
+    document.querySelectorAll('.gene-selector.open').forEach(s => s.classList.remove('open'));
+  }
+});
 
 function toggleGene(el) {
   el.classList.toggle('selected');
@@ -930,6 +1017,10 @@ function resetForm() {
   document.querySelectorAll('#geneCheckboxes .gene-chip-btn').forEach(el => el.classList.remove('selected'));
   document.querySelectorAll('#dadGeneChips .gene-chip-btn').forEach(el => el.classList.remove('selected'));
   document.querySelectorAll('#momGeneChips .gene-chip-btn').forEach(el => el.classList.remove('selected'));
+  document.getElementById('dadGeneLabel').textContent = '点击选择父本基因'; document.getElementById('dadGeneLabel').className = 'placeholder';
+  document.getElementById('momGeneLabel').textContent = '点击选择母本基因'; document.getElementById('momGeneLabel').className = 'placeholder';
+  document.getElementById('dadGeneSelector').classList.remove('open');
+  document.getElementById('momGeneSelector').classList.remove('open');
   document.getElementById('fSex').value = 'female';
   document.getElementById('fWeight').value = '';
   document.getElementById('fHatch').value = '';
@@ -1053,17 +1144,24 @@ function loadForm(id) {
     // Restore parent gene chips
     ['dad','mom'].forEach(p => {
       const container = document.getElementById(p+'GeneChips');
+      const label = document.getElementById(p+'GeneLabel');
+      const sel = document.getElementById(p+'GeneSelector');
       if (container) {
         container.querySelectorAll('.gene-chip-btn').forEach(c => c.classList.remove('selected'));
         const abbr = g[p === 'dad' ? 'father' : 'mother']?.geneAbbr || '';
         if (abbr) {
           const chip = container.querySelector('.gene-chip-btn[data-abbr="' + abbr + '"]');
-          if (chip) chip.classList.add('selected');
+          if (chip) {
+            chip.classList.add('selected');
+            if (label) { label.textContent = chip.textContent.trim(); label.className = 'selected-label'; }
+          }
         } else {
           const noneChip = container.querySelector('.gene-chip-btn[data-abbr=""]');
           if (noneChip) noneChip.classList.add('selected');
+          if (label) { label.textContent = '— 无'; label.className = 'placeholder'; }
         }
       }
+      if (sel) sel.classList.remove('open');
     });
     // Restore gecko photo
     const gImg = g.image || null;
