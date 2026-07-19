@@ -874,8 +874,7 @@ function initGeneCheckboxes() {
     const labelId = selId.replace('Selector', 'GeneLabel');
     const el = document.getElementById(chipsId);
     if (!el) return;
-    el.innerHTML = '<div class="gene-chip-btn" data-abbr="">— 无</div>' +
-      GENE_OPTIONS.map(g =>
+    el.innerHTML = GENE_OPTIONS.map(g =>
         '<div class="gene-chip-btn" data-abbr="' + g.abbr + '" onclick="toggleParentGene(this,\'' + selId + '\')">' +
           g.label + ' <span class="abbr">' + g.abbr + '</span>' +
         '</div>'
@@ -894,34 +893,25 @@ function toggleGeneDropdown(selId) {
 function toggleParentGene(el, selId) {
   const chipsId = selId.replace('Selector', 'Chips');
   const labelId = selId.replace('Selector', 'GeneLabel');
-  const chips = document.querySelectorAll('#' + chipsId + ' .gene-chip-btn');
-  const noneChip = chips.length ? chips[0] : null;
-  
-  if (el.dataset.abbr === '') {
-    // Clicked "— 无": clear all selections
-    chips.forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
-  } else {
-    // Toggle selection
-    el.classList.toggle('selected');
-    // If any gene is selected, deselect "— 无"
-    const hasSelected = Array.from(chips).some(c => c.dataset.abbr !== '' && c.classList.contains('selected'));
-    if (hasSelected && noneChip) noneChip.classList.remove('selected');
-    if (!hasSelected && noneChip) noneChip.classList.add('selected');
-  }
-  // Update trigger label
+  // Toggle selection
+  el.classList.toggle('selected');
+  // Update trigger label using same naming rules as main gene
   updateParentGeneLabel(labelId, chipsId);
 }
 
 function updateParentGeneLabel(labelId, chipsId) {
   const label = document.getElementById(labelId);
   const chips = document.querySelectorAll('#' + chipsId + ' .gene-chip-btn');
-  const selected = Array.from(chips).filter(c => c.dataset.abbr !== '' && c.classList.contains('selected'));
+  const selected = Array.from(chips).filter(c => c.classList.contains('selected'));
   if (selected.length === 0) {
-    label.textContent = '— 无';
+    label.textContent = '请选择';
     label.className = 'placeholder';
   } else {
-    label.textContent = selected.map(c => c.textContent.trim()).join(' + ');
+    const result = computeGeneDisplay(selected.map(c => ({
+      label: c.textContent.trim(),
+      abbr: c.dataset.abbr
+    })));
+    label.textContent = result.label || result.idAbbr || selected.map(c => c.dataset.abbr).join('+');
     label.className = 'selected-label';
   }
 }
@@ -1033,8 +1023,8 @@ function resetForm() {
   document.querySelectorAll('#geneCheckboxes .gene-chip-btn').forEach(el => el.classList.remove('selected'));
   document.querySelectorAll('#dadGeneChips .gene-chip-btn').forEach(el => el.classList.remove('selected'));
   document.querySelectorAll('#momGeneChips .gene-chip-btn').forEach(el => el.classList.remove('selected'));
-  document.getElementById('dadGeneLabel').textContent = '点击选择父本基因'; document.getElementById('dadGeneLabel').className = 'placeholder';
-  document.getElementById('momGeneLabel').textContent = '点击选择母本基因'; document.getElementById('momGeneLabel').className = 'placeholder';
+  document.getElementById('dadGeneLabel').textContent = '请选择'; document.getElementById('dadGeneLabel').className = 'placeholder';
+    document.getElementById('momGeneLabel').textContent = '请选择'; document.getElementById('momGeneLabel').className = 'placeholder';
   document.getElementById('dadGeneSelector').classList.remove('open');
   document.getElementById('momGeneSelector').classList.remove('open');
   document.getElementById('fSex').value = 'female';
@@ -1172,9 +1162,7 @@ function loadForm(id) {
           });
           if (label) { updateParentGeneLabel(label.id, container.id); }
         } else {
-          const noneChip = container.querySelector('.gene-chip-btn[data-abbr=""]');
-          if (noneChip) noneChip.classList.add('selected');
-          if (label) { label.textContent = '— 无'; label.className = 'placeholder'; }
+          if (label) { label.textContent = '\u8bf7\u9009\u62e9'; label.className = 'placeholder'; }
         }
       }
       if (sel) sel.classList.remove('open');
