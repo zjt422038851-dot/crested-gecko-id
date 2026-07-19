@@ -817,7 +817,7 @@ function initGeneCheckboxes() {
     if (!el) return;
     el.innerHTML = '<div class="gene-chip-btn" data-abbr="">— 无</div>' +
       GENE_OPTIONS.map(g =>
-        '<div class="gene-chip-btn" data-abbr="' + g.abbr + '" onclick="toggleParentGene(this,'' + id + '')">' +
+        '<div class="gene-chip-btn" data-abbr="' + g.abbr + '" onclick="toggleParentGene(this,\'' + id + '\')">' +
           g.label + ' <span class="abbr">' + g.abbr + '</span>' +
         '</div>'
       ).join('');
