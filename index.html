@@ -1233,10 +1233,8 @@ function onScanSuccess(decodedText) {
   if (geckoId) {
     dbGet(geckoId).then(g => {
       if (g) {
-        document.getElementById('scannerResult').innerHTML =
-          '<div style="color:var(--accent);font-size:15px;">\u2705 \u8BC6\u522B\u6210\u529F\uFF01' + g.id + '</div>' +
-          '<button class="btn btn-primary" onclick="showDetail(\'' + g.id + '\')" style="margin-top:8px;padding:8px 20px;width:auto;display:inline-block;">\u67E5\u770B\u8BE6\u60C5</button>';
-        toast('\u2705 \u5DF2\u8BC6\u522B: ' + g.id);
+        toast('✅ 已识别: ' + g.id);
+        showDetail(g.id);
       } else {
         document.getElementById('scannerResult').innerHTML =
           '<div style="color:#ff6060;">\u26A0\uFE0F \u672A\u627E\u5230\u7F16\u53F7 "' + geckoId + '" \u7684\u776B\u89D2\u6570\u636E</div>' +
