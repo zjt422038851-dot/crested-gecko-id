@@ -895,19 +895,35 @@ function toggleParentGene(el, selId) {
   const chipsId = selId.replace('Selector', 'Chips');
   const labelId = selId.replace('Selector', 'GeneLabel');
   const chips = document.querySelectorAll('#' + chipsId + ' .gene-chip-btn');
-  chips.forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  // Update trigger label
-  const label = document.getElementById(labelId);
-  if (el.dataset.abbr) {
-    label.textContent = el.textContent.trim();
-    label.className = 'selected-label';
+  const noneChip = chips.length ? chips[0] : null;
+  
+  if (el.dataset.abbr === '') {
+    // Clicked "— 无": clear all selections
+    chips.forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
   } else {
+    // Toggle selection
+    el.classList.toggle('selected');
+    // If any gene is selected, deselect "— 无"
+    const hasSelected = Array.from(chips).some(c => c.dataset.abbr !== '' && c.classList.contains('selected'));
+    if (hasSelected && noneChip) noneChip.classList.remove('selected');
+    if (!hasSelected && noneChip) noneChip.classList.add('selected');
+  }
+  // Update trigger label
+  updateParentGeneLabel(labelId, chipsId);
+}
+
+function updateParentGeneLabel(labelId, chipsId) {
+  const label = document.getElementById(labelId);
+  const chips = document.querySelectorAll('#' + chipsId + ' .gene-chip-btn');
+  const selected = Array.from(chips).filter(c => c.dataset.abbr !== '' && c.classList.contains('selected'));
+  if (selected.length === 0) {
     label.textContent = '— 无';
     label.className = 'placeholder';
+  } else {
+    label.textContent = selected.map(c => c.textContent.trim()).join(' + ');
+    label.className = 'selected-label';
   }
-  // Close dropdown
-  document.getElementById(selId).classList.remove('open');
 }
 
 // Close dropdown when clicking outside
@@ -1141,20 +1157,20 @@ function loadForm(id) {
     document.getElementById('fDadName').value = g.father?.name || '';
     document.getElementById('fMomName').value = g.mother?.name || '';
     document.getElementById('fNotes').value = g.notes || '';
-    // Restore parent gene chips
+    // Restore parent gene chips (multi-select)
     ['dad','mom'].forEach(p => {
       const container = document.getElementById(p+'GeneChips');
       const label = document.getElementById(p+'GeneLabel');
       const sel = document.getElementById(p+'GeneSelector');
       if (container) {
         container.querySelectorAll('.gene-chip-btn').forEach(c => c.classList.remove('selected'));
-        const abbr = g[p === 'dad' ? 'father' : 'mother']?.geneAbbr || '';
-        if (abbr) {
-          const chip = container.querySelector('.gene-chip-btn[data-abbr="' + abbr + '"]');
-          if (chip) {
-            chip.classList.add('selected');
-            if (label) { label.textContent = chip.textContent.trim(); label.className = 'selected-label'; }
-          }
+        const abbrs = g[p === 'dad' ? 'father' : 'mother']?.geneAbbrs || [];
+        if (abbrs.length > 0) {
+          abbrs.forEach(abbr => {
+            const chip = container.querySelector('.gene-chip-btn[data-abbr="' + abbr + '"]');
+            if (chip) chip.classList.add('selected');
+          });
+          if (label) { updateParentGeneLabel(label.id, container.id); }
         } else {
           const noneChip = container.querySelector('.gene-chip-btn[data-abbr=""]');
           if (noneChip) noneChip.classList.add('selected');
@@ -1192,39 +1208,44 @@ function loadForm(id) {
 function collectForm() {
   const selected = getSelectedGenes();
   const display = computeGeneDisplay(selected);
-  function getParentGene(containerId) {
-    const sel = document.querySelector('#' + containerId + ' .gene-chip-btn.selected');
-    return sel && sel.dataset.abbr ? sel.dataset.abbr : '';
+  function getParentGenes(containerId) {
+      const chips = document.querySelectorAll('#' + containerId + ' .gene-chip-btn');
+      return Array.from(chips)
+        .filter(c => c.dataset.abbr !== '' && c.classList.contains('selected'))
+        .map(c => c.dataset.abbr);
+    }
+    return {
+      geneAbbrs: selected.map(g => g.abbr),
+      gene: display.label,
+      sex: document.getElementById('fSex').value,
+      weight: document.getElementById('fWeight').value.trim(),
+      hatchDate: document.getElementById('fHatch').value,
+      notes: document.getElementById('fNotes').value.trim(),
+      image: window._geckoImgData || undefined,
+      father: {
+        name: document.getElementById('fDadName').value.trim(),
+        geneAbbrs: getParentGenes('dadGeneChips'),
+        morph: getParentGeneDisplay('dadGeneChips'),
+        image: window._dadImgData || undefined
+      },
+      mother: {
+        name: document.getElementById('fMomName').value.trim(),
+        geneAbbrs: getParentGenes('momGeneChips'),
+        morph: getParentGeneDisplay('momGeneChips'),
+        image: window._momImgData || undefined
+      },
+    };
   }
-  return {
-    geneAbbrs: selected.map(g => g.abbr),
-    gene: display.label,
-    sex: document.getElementById('fSex').value,
-    weight: document.getElementById('fWeight').value.trim(),
-    hatchDate: document.getElementById('fHatch').value,
-    notes: document.getElementById('fNotes').value.trim(),
-    image: window._geckoImgData || undefined,
-    father: {
-      name: document.getElementById('fDadName').value.trim(),
-      geneAbbr: getParentGene('dadGeneChips'),
-      morph: getParentGeneDisplay('dadGeneChips'),
-      image: window._dadImgData || undefined
-    },
-    mother: {
-      name: document.getElementById('fMomName').value.trim(),
-      geneAbbr: getParentGene('momGeneChips'),
-      morph: getParentGeneDisplay('momGeneChips'),
-      image: window._momImgData || undefined
-    },
-  };
-}
 
-function getParentGeneDisplay(containerId) {
-  const sel = document.querySelector('#' + containerId + ' .gene-chip-btn.selected');
-  if (!sel || !sel.dataset.abbr) return '';
-  const g = GENE_OPTIONS.find(o => o.abbr === sel.dataset.abbr);
-  return g ? g.label : sel.dataset.abbr;
-}
+  function getParentGeneDisplay(containerId) {
+    const chips = document.querySelectorAll('#' + containerId + ' .gene-chip-btn');
+    const selected = Array.from(chips).filter(c => c.dataset.abbr !== '' && c.classList.contains('selected'));
+    if (selected.length === 0) return '';
+    return selected.map(c => {
+      const g = GENE_OPTIONS.find(o => o.abbr === c.dataset.abbr);
+      return g ? g.label : c.dataset.abbr;
+    }).join(' + ');
+  }
 
 async function saveGecko() {
   const data = collectForm();
@@ -1275,10 +1296,12 @@ function deleteGecko() {
 }
 
 // ====== Detail ======
-function parentGeneLabel(abbr) {
-  if (!abbr) return '';
-  const g = GENE_OPTIONS.find(o => o.abbr === abbr);
-  return g ? g.label : abbr;
+function parentGeneLabel(abbrs) {
+  if (!abbrs || !Array.isArray(abbrs) || abbrs.length === 0) return '';
+  return abbrs.map(a => {
+    const g = GENE_OPTIONS.find(o => o.abbr === a);
+    return g ? g.label : a;
+  }).join(' + ');
 }
 function showDetail(id) {
   const container = document.getElementById('detailContent');
@@ -1306,13 +1329,13 @@ function showDetail(id) {
         '<div class="detail-cell"><div class="label">破壳日期</div><div class="value">' + (g.hatchDate||'—') + '</div></div>' +
         '<div class="detail-cell"><div class="label">已录入</div><div class="value" style="font-size:12px;">' + (g.createdAt ? new Date(g.createdAt).toLocaleDateString('zh-CN') : '—') + '</div></div>' +
       '</div>' +
-      '<div class="detail-section"><h3>👪 亲本</h3><div class="parents-grid-detail">' +
-        '<div class="parent-card-detail"><div class="role">♂ Father</div>' +
-          (g.father?.image ? '<img class="parent-photo" src="' + g.father.image + '" alt="父亲">' : '<div class="parent-photo-placeholder">🦎</div>') +
-          '<div class="p-name">' + (g.father?.name||'—') + '</div><div class="p-morph">' + (g.father?.morph||parentGeneLabel(g.father?.geneAbbr)||'') + '</div></div>' +
-        '<div class="parent-card-detail"><div class="role">♀ Mother</div>' +
-          (g.mother?.image ? '<img class="parent-photo" src="' + g.mother.image + '" alt="母亲">' : '<div class="parent-photo-placeholder">🦎</div>') +
-          '<div class="p-name">' + (g.mother?.name||'—') + '</div><div class="p-morph">' + (g.mother?.morph||parentGeneLabel(g.mother?.geneAbbr)||'') + '</div></div>' +
+      '<div class="detail-section"><h3>\uD83D\uDC6A \u4EB2\u672C</h3><div class="parents-grid-detail">' +
+        '<div class="parent-card-detail"><div class="role">\u2642 Father</div>' +
+          (g.father?.image ? '<img class="parent-photo" src="' + g.father.image + '" alt="\u7236\u4EB2">' : '<div class="parent-photo-placeholder">\uD83E\uDD8E</div>') +
+          '<div class="p-name">' + (g.father?.name||'\u2014') + '</div><div class="p-morph">' + (g.father?.morph||parentGeneLabel(g.father?.geneAbbrs)||'') + '</div></div>' +
+        '<div class="parent-card-detail"><div class="role">\u2640 Mother</div>' +
+          (g.mother?.image ? '<img class="parent-photo" src="' + g.mother.image + '" alt="\u6BCD\u4EB2">' : '<div class="parent-photo-placeholder">\uD83E\uDD8E</div>') +
+          '<div class="p-name">' + (g.mother?.name||'\u2014') + '</div><div class="p-morph">' + (g.mother?.morph||parentGeneLabel(g.mother?.geneAbbrs)||'') + '</div></div>' +
       '</div></div>' +
       (g.notes ? '<div class="detail-section"><h3>\uD83D\uDCDD \u5907\u6CE8</h3><div class="detail-note">' + g.notes + '</div></div>' : '') +
       '<div class="qr-section"><h3>\uD83D\uDCF1 \u4E13\u5C5E\u4E8C\u7EF4\u7801</h3><div id="qrcode"></div>' +
