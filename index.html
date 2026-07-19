@@ -459,7 +459,7 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
   </div>
   <div class="form-group">
     <label class="form-label">基因 * <span style="font-weight:400;text-transform:none;color:var(--text3);">（可多选）</span></label>
-    <div id="geneCheckboxes" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+    <div id="geneCheckboxes" style="display:flex;flex-wrap:nowrap;gap:6px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;"></div>
   </div>
   <div class="form-group">
     <label class="form-label">编号</label>
@@ -487,6 +487,19 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
     </div>
   </div>
 
+  <div class="form-section"><h3>📷 睫角照片</h3></div>
+  <div class="form-group">
+    <div class="parent-img-upload">
+      <div class="preview empty" id="geckoPreview">📷</div>
+      <div class="img-info" id="geckoImgInfo">未选择照片</div>
+      <div class="img-actions">
+        <button class="btn-add-img" onclick="document.getElementById('geckoImgInput').click()">选择</button>
+        <button class="btn-remove-img" id="geckoRemoveBtn" onclick="removeImg('gecko')" style="display:none;">删除</button>
+      </div>
+      <input type="file" id="geckoImgInput" accept="image/*" onchange="handleImgUpload(event,'gecko')" style="display:none;">
+    </div>
+  </div>
+
   <div class="form-section"><h3>👪 亲本</h3></div>
   <div class="form-row">
     <div class="form-group">
@@ -495,7 +508,7 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
     </div>
     <div class="form-group">
       <label class="form-label">♂ 父本基因</label>
-      <input class="form-input" id="fDadMorph" placeholder="Flame">
+      <div id="dadGeneChips" style="display:flex;flex-wrap:nowrap;gap:4px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;"></div>
     </div>
   </div>
   <div class="form-group">
@@ -505,9 +518,9 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
       <div class="img-info" id="dadImgInfo">未选择照片</div>
       <div class="img-actions">
         <button class="btn-add-img" onclick="document.getElementById('dadImgInput').click()">选择</button>
-        <button class="btn-remove-img" id="dadRemoveBtn" onclick="removeParentImg('dad')" style="display:none;">删除</button>
+        <button class="btn-remove-img" id="dadRemoveBtn" onclick="removeImg('dad')" style="display:none;">删除</button>
       </div>
-      <input type="file" id="dadImgInput" accept="image/*" onchange="handleParentImg(event,'dad')" style="display:none;">
+      <input type="file" id="dadImgInput" accept="image/*" onchange="handleImgUpload(event,'dad')" style="display:none;">
     </div>
   </div>
   <div class="form-row">
@@ -517,7 +530,7 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
     </div>
     <div class="form-group">
       <label class="form-label">♀ 母本基因</label>
-      <input class="form-input" id="fMomMorph" placeholder="Cream">
+      <div id="momGeneChips" style="display:flex;flex-wrap:nowrap;gap:4px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;"></div>
     </div>
   </div>
   <div class="form-group">
@@ -527,9 +540,9 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
       <div class="img-info" id="momImgInfo">未选择照片</div>
       <div class="img-actions">
         <button class="btn-add-img" onclick="document.getElementById('momImgInput').click()">选择</button>
-        <button class="btn-remove-img" id="momRemoveBtn" onclick="removeParentImg('mom')" style="display:none;">删除</button>
+        <button class="btn-remove-img" id="momRemoveBtn" onclick="removeImg('mom')" style="display:none;">删除</button>
       </div>
-      <input type="file" id="momImgInput" accept="image/*" onchange="handleParentImg(event,'mom')" style="display:none;">
+      <input type="file" id="momImgInput" accept="image/*" onchange="handleImgUpload(event,'mom')" style="display:none;">
     </div>
   </div>
 
@@ -798,6 +811,23 @@ function initGeneCheckboxes() {
       g.label + ' <span class="abbr">' + g.abbr + '</span>' +
     '</div>'
   ).join('');
+  // Init parent gene chips (single-select)
+  ['dadGeneChips','momGeneChips'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = '<div class="gene-chip-btn" data-abbr="">— 无</div>' +
+      GENE_OPTIONS.map(g =>
+        '<div class="gene-chip-btn" data-abbr="' + g.abbr + '" onclick="toggleParentGene(this,'' + id + '')">' +
+          g.label + ' <span class="abbr">' + g.abbr + '</span>' +
+        '</div>'
+      ).join('');
+  });
+}
+
+function toggleParentGene(el, containerId) {
+  const chips = document.querySelectorAll('#' + containerId + ' .gene-chip-btn');
+  chips.forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
 }
 
 function toggleGene(el) {
@@ -894,49 +924,97 @@ let editingId = null;
 
 function resetForm() {
   editingId = null;
-  document.getElementById('formTitle').textContent = '\u6dfb\u52a0\u776b\u89d2';
+  document.getElementById('formTitle').textContent = '添加睫角';
   document.getElementById('fId').value = '';
-  document.getElementById('fIdPreview').textContent = '\u9009\u62e9\u57fa\u56e0\u540e\u81ea\u52a8\u751f\u6210';
+  document.getElementById('fIdPreview').textContent = '选择基因后自动生成';
   document.querySelectorAll('#geneCheckboxes .gene-chip-btn').forEach(el => el.classList.remove('selected'));
+  document.querySelectorAll('#dadGeneChips .gene-chip-btn').forEach(el => el.classList.remove('selected'));
+  document.querySelectorAll('#momGeneChips .gene-chip-btn').forEach(el => el.classList.remove('selected'));
   document.getElementById('fSex').value = 'female';
   document.getElementById('fWeight').value = '';
   document.getElementById('fHatch').value = '';
   document.getElementById('fDadName').value = '';
-  document.getElementById('fDadMorph').value = '';
   document.getElementById('fMomName').value = '';
-  document.getElementById('fMomMorph').value = '';
   document.getElementById('fNotes').value = '';
-  ['dad','mom'].forEach(p => {
+  ['dad','mom','gecko'].forEach(p => {
     document.getElementById(p+'Preview').src = '';
     document.getElementById(p+'Preview').className = 'preview empty';
-    document.getElementById(p+'Preview').textContent = '\uD83D\uDCF7';
-    document.getElementById(p+'ImgInfo').textContent = '\u672a\u9009\u62e9\u7167\u7247';
+    document.getElementById(p+'Preview').textContent = '📷';
+    document.getElementById(p+'ImgInfo').textContent = '未选择照片';
     document.getElementById(p+'RemoveBtn').style.display = 'none';
     window['_'+p+'ImgData'] = null;
   });
 }
 
 // ====== Parent Image Handling ======
-function handleParentImg(event, parent) {
+function compressImage(dataUrl, maxSizeMB, quality, callback) {
+  const img = new Image();
+  img.onload = function() {
+    let w = img.width, h = img.height;
+    const canvas = document.createElement('canvas');
+    let q = quality;
+    // Try compressing with decreasing quality until under maxSize
+    function tryCompress() {
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      const compressed = canvas.toDataURL('image/jpeg', q);
+      // Estimate size: base64 length * 0.75 ≈ bytes
+      const estBytes = compressed.length * 0.75;
+      if (estBytes > maxSizeMB * 1024 * 1024 && q > 0.1) {
+        q = Math.round((q - 0.1) * 10) / 10;
+        if (q < 0.1) q = 0.1;
+        tryCompress();
+      } else {
+        callback(compressed);
+      }
+    }
+    tryCompress();
+  };
+  img.src = dataUrl;
+}
+
+function handleImgUpload(event, key) {
   const file = event.target.files[0];
   if (!file) return;
   if (!file.type.startsWith('image/')) { toast('\u26A0\uFE0F \u8BF7\u9009\u62E9\u56FE\u7247\u6587\u4EF6'); return; }
-  if (file.size > 5 * 1024 * 1024) { toast('\u26A0\uFE0F \u56FE\u7247\u4E0D\u80FD\u8D85\u8FC75MB'); return; }
 
   const reader = new FileReader();
   reader.onload = e => {
     const dataUrl = e.target.result;
-    window['_'+parent+'ImgData'] = dataUrl;
-    const preview = document.getElementById(parent+'Preview');
-    preview.src = dataUrl;
-    preview.className = 'preview';
-    preview.textContent = '';
-    document.getElementById(parent+'ImgInfo').textContent = file.name;
-    document.getElementById(parent+'RemoveBtn').style.display = 'inline-block';
-    toast('\u2705 \u5DF2\u9009\u62E9\u7167\u7247');
+    if (file.size > 5 * 1024 * 1024) {
+      compressImage(dataUrl, 5, 0.8, function(compressed) {
+        setImage(key, compressed, file.name);
+        toast('\u2705 \u7167\u7247\u5DF2\u538B\u7F29\u4E0A\u4F20');
+      });
+    } else {
+      setImage(key, dataUrl, file.name);
+      toast('\u2705 \u5DF2\u9009\u62E9\u7167\u7247');
+    }
   };
   reader.readAsDataURL(file);
   event.target.value = '';
+}
+
+function setImage(key, dataUrl, fileName) {
+  window['_'+key+'ImgData'] = dataUrl;
+  const preview = document.getElementById(key+'Preview');
+  preview.src = dataUrl;
+  preview.className = 'preview';
+  preview.textContent = '';
+  document.getElementById(key+'ImgInfo').textContent = fileName || '\u5DF2\u9009\u7167\u7247';
+  document.getElementById(key+'RemoveBtn').style.display = 'inline-block';
+}
+
+function removeImg(key) {
+  window['_'+key+'ImgData'] = null;
+  const preview = document.getElementById(key+'Preview');
+  preview.src = '';
+  preview.className = 'preview empty';
+  preview.textContent = '\uD83D\uDCF7';
+  document.getElementById(key+'ImgInfo').textContent = '\u672A\u9009\u62E9\u7167\u7247';
+  document.getElementById(key+'RemoveBtn').style.display = 'none';
+  toast('\u5DF2\u5220\u9664\u7167\u7247');
 }
 
 function removeParentImg(parent) {
@@ -970,10 +1048,32 @@ function loadForm(id) {
     document.getElementById('fWeight').value = g.weight || '';
     document.getElementById('fHatch').value = g.hatchDate || '';
     document.getElementById('fDadName').value = g.father?.name || '';
-    document.getElementById('fDadMorph').value = g.father?.morph || '';
     document.getElementById('fMomName').value = g.mother?.name || '';
-    document.getElementById('fMomMorph').value = g.mother?.morph || '';
     document.getElementById('fNotes').value = g.notes || '';
+    // Restore parent gene chips
+    ['dad','mom'].forEach(p => {
+      const container = document.getElementById(p+'GeneChips');
+      if (container) {
+        container.querySelectorAll('.gene-chip-btn').forEach(c => c.classList.remove('selected'));
+        const abbr = g[p === 'dad' ? 'father' : 'mother']?.geneAbbr || '';
+        if (abbr) {
+          const chip = container.querySelector('.gene-chip-btn[data-abbr="' + abbr + '"]');
+          if (chip) chip.classList.add('selected');
+        } else {
+          const noneChip = container.querySelector('.gene-chip-btn[data-abbr=""]');
+          if (noneChip) noneChip.classList.add('selected');
+        }
+      }
+    });
+    // Restore gecko photo
+    const gImg = g.image || null;
+    window._geckoImgData = gImg;
+    if (gImg) {
+      document.getElementById('geckoPreview').src = gImg;
+      document.getElementById('geckoPreview').className = 'preview';
+      document.getElementById('geckoImgInfo').textContent = '已选照片';
+      document.getElementById('geckoRemoveBtn').style.display = 'inline-block';
+    }
     ['dad','mom'].forEach(p => {
       const key = p === 'dad' ? 'father' : 'mother';
       const imgData = g[key]?.image || null;
@@ -994,6 +1094,10 @@ function loadForm(id) {
 function collectForm() {
   const selected = getSelectedGenes();
   const display = computeGeneDisplay(selected);
+  function getParentGene(containerId) {
+    const sel = document.querySelector('#' + containerId + ' .gene-chip-btn.selected');
+    return sel && sel.dataset.abbr ? sel.dataset.abbr : '';
+  }
   return {
     geneAbbrs: selected.map(g => g.abbr),
     gene: display.label,
@@ -1001,17 +1105,27 @@ function collectForm() {
     weight: document.getElementById('fWeight').value.trim(),
     hatchDate: document.getElementById('fHatch').value,
     notes: document.getElementById('fNotes').value.trim(),
+    image: window._geckoImgData || undefined,
     father: {
       name: document.getElementById('fDadName').value.trim(),
-      morph: document.getElementById('fDadMorph').value.trim(),
+      geneAbbr: getParentGene('dadGeneChips'),
+      morph: getParentGeneDisplay('dadGeneChips'),
       image: window._dadImgData || undefined
     },
     mother: {
       name: document.getElementById('fMomName').value.trim(),
-      morph: document.getElementById('fMomMorph').value.trim(),
+      geneAbbr: getParentGene('momGeneChips'),
+      morph: getParentGeneDisplay('momGeneChips'),
       image: window._momImgData || undefined
     },
   };
+}
+
+function getParentGeneDisplay(containerId) {
+  const sel = document.querySelector('#' + containerId + ' .gene-chip-btn.selected');
+  if (!sel || !sel.dataset.abbr) return '';
+  const g = GENE_OPTIONS.find(o => o.abbr === sel.dataset.abbr);
+  return g ? g.label : sel.dataset.abbr;
 }
 
 async function saveGecko() {
@@ -1063,6 +1177,11 @@ function deleteGecko() {
 }
 
 // ====== Detail ======
+function parentGeneLabel(abbr) {
+  if (!abbr) return '';
+  const g = GENE_OPTIONS.find(o => o.abbr === abbr);
+  return g ? g.label : abbr;
+}
 function showDetail(id) {
   const container = document.getElementById('detailContent');
   dbGet(id).then(g => {
@@ -1071,9 +1190,12 @@ function showDetail(id) {
     const sexCls = isF ? 'f' : g.sex === 'male' ? 'm' : '';
     const sexLabel = isF ? '\u2640 \u96CC\u6027' : g.sex === 'male' ? '\u2642 \u96C4\u6027' : '\u2753 \u672A\u77E5';
 
+    const geckoPhotoHtml = g.image
+      ? '<img src="' + g.image + '" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid ' + (isF ? 'rgba(228,120,154,0.25)' : g.sex===\'male\' ? 'rgba(90,159,212,0.25)' : 'var(--border)') + ';flex-shrink:0;">'
+      : '<div class="detail-avatar ' + sexCls + '">\uD83E\uDD8E</div>';
     container.innerHTML = '<div class="detail-header">' +
         '<button class="back-btn" onclick="showPage(\'list\')">\u2190</button>' +
-        '<div class="detail-avatar ' + sexCls + '">\uD83E\uDD8E</div>' +
+        geckoPhotoHtml +
         '<div class="detail-title">' +
           '<h2 style="font-family:monospace;letter-spacing:1px;">' + g.id + '</h2>' +
           '<div class="sub">' + (g.notes||'') + '</div>' +
@@ -1081,18 +1203,18 @@ function showDetail(id) {
         '</div>' +
       '</div>' +
       '<div class="detail-grid">' +
-        '<div class="detail-cell"><div class="label">\u6027\u522B</div><div class="value" style="color:' + (isF ? 'var(--female)' : g.sex==='male' ? 'var(--male)' : 'var(--text2)') + '">' + sexLabel + '</div></div>' +
-        '<div class="detail-cell"><div class="label">\u4F53\u91CD</div><div class="value">' + (g.weight ? g.weight+'g' : '\u2014') + '</div></div>' +
-        '<div class="detail-cell"><div class="label">\u7834\u58F3\u65E5\u671F</div><div class="value">' + (g.hatchDate||'\u2014') + '</div></div>' +
-        '<div class="detail-cell"><div class="label">\u5DF2\u5F55\u5165</div><div class="value" style="font-size:12px;">' + (g.createdAt ? new Date(g.createdAt).toLocaleDateString('zh-CN') : '\u2014') + '</div></div>' +
+        '<div class="detail-cell"><div class="label">性别</div><div class="value" style="color:' + (isF ? 'var(--female)' : g.sex==='male' ? 'var(--male)' : 'var(--text2)') + '">' + sexLabel + '</div></div>' +
+        '<div class="detail-cell"><div class="label">体重</div><div class="value">' + (g.weight ? g.weight+'g' : '—') + '</div></div>' +
+        '<div class="detail-cell"><div class="label">破壳日期</div><div class="value">' + (g.hatchDate||'—') + '</div></div>' +
+        '<div class="detail-cell"><div class="label">已录入</div><div class="value" style="font-size:12px;">' + (g.createdAt ? new Date(g.createdAt).toLocaleDateString('zh-CN') : '—') + '</div></div>' +
       '</div>' +
-      '<div class="detail-section"><h3>\uD83D\uDC6A \u4EB2\u672C</h3><div class="parents-grid-detail">' +
-        '<div class="parent-card-detail"><div class="role">\u2642 Father</div>' +
-          (g.father?.image ? '<img class="parent-photo" src="' + g.father.image + '" alt="\u7236\u4EB2">' : '<div class="parent-photo-placeholder">\uD83E\uDD8E</div>') +
-          '<div class="p-name">' + (g.father?.name||'\u2014') + '</div><div class="p-morph">' + (g.father?.morph||'') + '</div></div>' +
-        '<div class="parent-card-detail"><div class="role">\u2640 Mother</div>' +
-          (g.mother?.image ? '<img class="parent-photo" src="' + g.mother.image + '" alt="\u6BCD\u4EB2">' : '<div class="parent-photo-placeholder">\uD83E\uDD8E</div>') +
-          '<div class="p-name">' + (g.mother?.name||'\u2014') + '</div><div class="p-morph">' + (g.mother?.morph||'') + '</div></div>' +
+      '<div class="detail-section"><h3>👪 亲本</h3><div class="parents-grid-detail">' +
+        '<div class="parent-card-detail"><div class="role">♂ Father</div>' +
+          (g.father?.image ? '<img class="parent-photo" src="' + g.father.image + '" alt="父亲">' : '<div class="parent-photo-placeholder">🦎</div>') +
+          '<div class="p-name">' + (g.father?.name||'—') + '</div><div class="p-morph">' + (g.father?.morph||parentGeneLabel(g.father?.geneAbbr)||'') + '</div></div>' +
+        '<div class="parent-card-detail"><div class="role">♀ Mother</div>' +
+          (g.mother?.image ? '<img class="parent-photo" src="' + g.mother.image + '" alt="母亲">' : '<div class="parent-photo-placeholder">🦎</div>') +
+          '<div class="p-name">' + (g.mother?.name||'—') + '</div><div class="p-morph">' + (g.mother?.morph||parentGeneLabel(g.mother?.geneAbbr)||'') + '</div></div>' +
       '</div></div>' +
       (g.notes ? '<div class="detail-section"><h3>\uD83D\uDCDD \u5907\u6CE8</h3><div class="detail-note">' + g.notes + '</div></div>' : '') +
       '<div class="qr-section"><h3>\uD83D\uDCF1 \u4E13\u5C5E\u4E8C\u7EF4\u7801</h3><div id="qrcode"></div>' +
