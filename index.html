@@ -388,7 +388,10 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
   max-height: 220px; overflow-y: auto;
 }
 .gene-selector.open .gene-selector-dropdown {
-  display: flex; flex-wrap: wrap; gap: 4px;
+  display: block;
+}
+.gene-selector-dropdown .gene-chip-btn {
+  display: inline-flex; margin: 2px;
 }
 .gene-selector-dropdown .gene-chip-btn {
   flex: 0 0 auto;
@@ -878,7 +881,10 @@ function initGeneCheckboxes() {
         '<div class="gene-chip-btn" data-abbr="' + g.abbr + '" onclick="toggleParentGene(this,\'' + selId + '\')">' +
           g.label + ' <span class="abbr">' + g.abbr + '</span>' +
         '</div>'
-      ).join('');
+      ).join('') +
+      '<div style="padding:8px 4px 2px;border-top:1px solid var(--border);margin-top:4px;text-align:center;">' +
+        '<button class="btn btn-primary" onclick="confirmParentGene(\'' + selId + '\')" style="padding:6px 24px;font-size:13px;width:auto;display:inline-block;border-radius:8px;">✔ 确认</button>' +
+      '</div>';
   });
 }
 
@@ -886,17 +892,19 @@ function toggleGeneDropdown(selId) {
   const sel = document.getElementById(selId);
   const isOpen = sel.classList.contains('open');
   // Close all other dropdowns
-  document.querySelectorAll('.gene-selector.open').forEach(s => s.classList.remove('open'));
-  if (!isOpen) sel.classList.add('open');
+  document.querySelectorAll('.gene-selector.open').forEach(s => {
+    restoreParentGeneChips(s.id);
+    s.classList.remove('open');
+  });
+  if (!isOpen) {
+    restoreParentGeneChips(selId);
+    sel.classList.add('open');
+  }
 }
 
 function toggleParentGene(el, selId) {
-  const chipsId = selId.replace('Selector', 'Chips');
-  const labelId = selId.replace('Selector', 'GeneLabel');
-  // Toggle selection
+  // Toggle visual selection only - label updates on confirm
   el.classList.toggle('selected');
-  // Update trigger label using same naming rules as main gene
-  updateParentGeneLabel(labelId, chipsId);
 }
 
 function updateParentGeneLabel(labelId, chipsId) {
@@ -916,10 +924,42 @@ function updateParentGeneLabel(labelId, chipsId) {
   }
 }
 
-// Close dropdown when clicking outside
+function restoreParentGeneChips(selId) {
+  const chipsId = selId.replace('Selector', 'Chips');
+  const chips = document.querySelectorAll('#' + chipsId + ' .gene-chip-btn');
+  chips.forEach(c => c.classList.remove('selected'));
+  const confirmed = document.getElementById(selId).dataset.confirmed;
+  if (confirmed) {
+    try {
+      const abbrs = JSON.parse(confirmed);
+      abbrs.forEach(abbr => {
+        const chip = document.querySelector('#' + chipsId + ' .gene-chip-btn[data-abbr="' + abbr + '"]');
+        if (chip) chip.classList.add('selected');
+      });
+    } catch(e) {}
+  }
+}
+
+function confirmParentGene(selId) {
+  const chipsId = selId.replace('Selector', 'Chips');
+  const chips = document.querySelectorAll('#' + chipsId + ' .gene-chip-btn');
+  const selected = Array.from(chips).filter(c => c.classList.contains('selected')).map(c => c.dataset.abbr);
+  // Save confirmed state
+  document.getElementById(selId).dataset.confirmed = JSON.stringify(selected);
+  // Update label
+  const labelId = selId.replace('Selector', 'GeneLabel');
+  updateParentGeneLabel(labelId, chipsId);
+  // Close dropdown
+  document.getElementById(selId).classList.remove('open');
+}
+
+// Close dropdown when clicking outside - restore to confirmed state
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.gene-selector')) {
-    document.querySelectorAll('.gene-selector.open').forEach(s => s.classList.remove('open'));
+    document.querySelectorAll('.gene-selector.open').forEach(s => {
+      restoreParentGeneChips(s.id);
+      s.classList.remove('open');
+    });
   }
 });
 
