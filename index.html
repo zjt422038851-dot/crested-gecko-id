@@ -874,7 +874,7 @@ function initGeneCheckboxes() {
   // Init parent gene selectors (dropdown-style)
   ['dadGeneSelector','momGeneSelector'].forEach(selId => {
     const chipsId = selId.replace('Selector', 'Chips');
-    const labelId = selId.replace('Selector', 'GeneLabel');
+    const labelId = selId.replace('Selector', 'Label');
     const el = document.getElementById(chipsId);
     if (!el) return;
     el.innerHTML = GENE_OPTIONS.map(g =>
@@ -947,7 +947,7 @@ function confirmParentGene(selId) {
   // Save confirmed state
   document.getElementById(selId).dataset.confirmed = JSON.stringify(selected);
   // Update label
-  const labelId = selId.replace('Selector', 'GeneLabel');
+  const labelId = selId.replace('Selector', 'Label');
   updateParentGeneLabel(labelId, chipsId);
   // Close dropdown
   document.getElementById(selId).classList.remove('open');
