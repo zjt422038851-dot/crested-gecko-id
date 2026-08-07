@@ -9,6 +9,7 @@
 <title>睫角守宫 ID</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
 <style>
@@ -2307,6 +2308,10 @@ async function breedShowDetail(id) {
   const list = await breedDbGetAll('clutches');
   const c = list.find(x => x.id === id);
   if (!c) { toast('⚠️ 记录不存在'); breedShowList(); return; }
+  breedRenderDetail(c);
+}
+// 纯渲染窝次详情（支持二维码数据自包含：无本地数据也能显示）
+function breedRenderDetail(c) {
   const f = c.father || {};
   const m = c.mother || {};
   const eggs = c.eggs || [];
@@ -2700,6 +2705,7 @@ function openQRModal(url, infoHtml) {
   document.getElementById('breedQRModal').classList.add('show');
 }
 // 窝次二维码：一次交配/一窝只生成一个（含 2 颗蛋）
+// 二维码 URL 内置压缩的窝次数据（d 参数）——扫码后任何设备都能直达详情，不依赖本地数据
 function showClutchQR(clutchId) {
   breedDbGetAll('clutches').then(list => {
     const c = list.find(x => x.id === clutchId);
@@ -2708,7 +2714,18 @@ function showClutchQR(clutchId) {
     const eggs = c.eggs || [];
     const hatched = eggs.filter(e => e.status === 'hatched').length;
     const base = window.location.href.split('#')[0].split('?')[0];
-    openQRModal(base + '?clutch=' + clutchId,
+    let d = '';
+    try {
+      const compact = {
+        id: c.id,
+        laidDate: c.laidDate || '', temp: c.temp || '',
+        f: f.name ? { n: f.name, m: f.morph || '', a: f.geneAbbrs || [] } : null,
+        mo: m.name ? { n: m.name, m: m.morph || '', a: m.geneAbbrs || [] } : null,
+        eggs: eggs.map(e => ({ id: e.id, s: e.status || '', h: e.hatchDate || '', b: e.babyId || '' }))
+      };
+      d = '&d=' + LZString.compressToEncodedURIComponent(JSON.stringify(compact));
+    } catch (e) { d = ''; }
+    openQRModal(base + '?clutch=' + clutchId + d,
       '窝次 ' + esc(c.id) + ' · ' + eggs.length + ' 枚蛋' +
       (hatched ? '（已出壳 ' + hatched + '）' : '') + '<br>下蛋 ' + esc(c.laidDate || '—') +
       (c.temp ? ' · ' + esc(c.temp) + '℃' : '') +
@@ -2985,8 +3002,26 @@ openDB().then(() => {
   }
   const clutchParam = params.get('clutch');
   if (clutchParam) {
-    // 蛋专属二维码：直达该窝次详情
+    // 窝次二维码：直达该窝次详情
     switchTab('breed');
+    const clutchData = params.get('d');
+    if (clutchData) {
+      // 数据自包含模式：二维码内置压缩数据，任何设备（无本地数据）都能显示详情
+      try {
+        const c = JSON.parse(LZString.decompressFromEncodedURIComponent(clutchData));
+        if (c && c.id) {
+          // compact 结构 → 标准结构（f:{n,m,a} → father:{name,morph,geneAbbrs}）
+          const norm = {
+            id: c.id, laidDate: c.laidDate, temp: c.temp,
+            father: c.f ? { name: c.f.n, morph: c.f.m, geneAbbrs: c.f.a } : null,
+            mother: c.mo ? { name: c.mo.n, morph: c.mo.m, geneAbbrs: c.mo.a } : null,
+            eggs: c.eggs || []
+          };
+          setTimeout(() => breedRenderDetail(norm), 400);
+          return;
+        }
+      } catch (e) { /* 数据损坏则走本地查询 */ }
+    }
     setTimeout(() => breedShowDetail(clutchParam), 400);
   }
 }).catch(e => {
