@@ -1039,8 +1039,8 @@ function lsLoad() {
   return lsData;
 }
 function lsSave() {
-  try { localStorage.setItem(LS_KEY, JSON.stringify(lsData)); }
-  catch (e) { toast('⚠️ 存储空间不足，无法保存'); }
+  try { localStorage.setItem(LS_KEY, JSON.stringify(lsData)); return true; }
+  catch (e) { return false; }
 }
 function useLocalStorage() {
   if (storageMode === 'ls') return;
@@ -1048,20 +1048,72 @@ function useLocalStorage() {
   lsLoad();
   console.warn('IndexedDB 不可用，已降级为 localStorage 存储');
 }
+// 保存失败（通常空间不足）→ 压缩全部图片后重试
+function lsSaveWithShrink() {
+  const tasks = [];
+  ['geckos', 'clutches', 'parents'].forEach(store => {
+    (lsData[store] || []).forEach(obj => walkImages(obj, (o, k) => tasks.push({ o, k })));
+  });
+  if (tasks.length === 0) { return lsSave(); }
+  let left = tasks.length, ok = true;
+  tasks.forEach(t => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 300; // 缩略图尺寸
+      let w = img.width, h = img.height;
+      if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      t.o[t.k] = c.toDataURL('image/jpeg', 0.7);
+      if (--left === 0 && ok) {
+        if (!lsSave()) { ok = false; toast('⚠️ 存储空间不足：请删除部分照片或改用支持 IndexedDB 的浏览器'); }
+      }
+    };
+    img.onerror = () => { if (--left === 0 && ok) { ok = false; toast('⚠️ 部分照片压缩失败'); } };
+    img.src = t.o[t.k];
+  });
+  return ok;
+}
+function walkImages(obj, cb) {
+  if (!obj || typeof obj !== 'object') return;
+  Object.keys(obj).forEach(k => {
+    const v = obj[k];
+    if (typeof v === 'string' && v.indexOf('data:image') === 0) cb(obj, k);
+    else if (v && typeof v === 'object') walkImages(v, cb);
+  });
+}
 function lsGetAll(store) { lsLoad(); return lsData[store] || []; }
 function lsPut(store, obj) {
   lsLoad();
   const arr = lsData[store] || (lsData[store] = []);
   const i = arr.findIndex(x => x.id === obj.id);
   if (i >= 0) arr[i] = obj; else arr.push(obj);
-  lsSave();
+  if (!lsSave()) { lsSaveWithShrink(); }
 }
 function lsDelete(store, id) {
   lsLoad();
   lsData[store] = (lsData[store] || []).filter(x => x.id !== id);
-  lsSave();
+  if (!lsSave()) { lsSaveWithShrink(); }
 }
 function lsClear(store) { lsLoad(); lsData[store] = []; lsSave(); }
+// IndexedDB 恢复可用时，把 localStorage 里 idb 缺失的数据补进去（防降级期间数据丢失）
+function migrateLsToIdb() {
+  if (storageMode === 'ls' || !db) return Promise.resolve();
+  return Promise.all(['geckos', 'clutches', 'parents'].map(store => {
+    const lsArr = lsGetAll(store);
+    if (lsArr.length === 0) return Promise.resolve();
+    return breedDbGetAll(store).then(idbArr => {
+      if (idbArr.length > 0) return Promise.resolve(); // idb 已有数据，以 idb 为准
+      return Promise.all(lsArr.map(obj => new Promise((res, rej) => {
+        const tx = db.transaction(store, 'readwrite');
+        tx.objectStore(store).put(obj);
+        tx.oncomplete = res;
+        tx.onerror = rej;
+      })));
+    });
+  }));
+}
 
 function openDB() {
   return new Promise((resolve) => {
@@ -1088,7 +1140,11 @@ function openDB() {
         d.createObjectStore('parents', { keyPath: 'id' });
       }
     };
-    req.onsuccess = e => { db = e.target.result; resolve(db); };
+    req.onsuccess = e => {
+      db = e.target.result;
+      // 迁移 localStorage → IndexedDB（此前降级模式存的数据，恢复后补进 idb）
+      migrateLsToIdb().then(() => resolve(db)).catch(() => resolve(db));
+    };
     req.onerror = e => {
       const err = e.target && e.target.error;
       const msg = (err && err.message) || '';
@@ -1127,7 +1183,8 @@ function dbGet(id) {
 }
 
 function dbPut(gecko) {
-  if (storageMode === 'ls' || !db) { lsPut('geckos', gecko); return Promise.resolve(); }
+  lsPut('geckos', gecko); // 双写：localStorage 始终同步（降级/恢复兜底）
+  if (storageMode === 'ls' || !db) return Promise.resolve();
   return new Promise((resolve, reject) => {
     const tx = db.transaction('geckos', 'readwrite');
     const req = tx.objectStore('geckos').put(gecko);
@@ -1137,7 +1194,8 @@ function dbPut(gecko) {
 }
 
 function dbDelete(id) {
-  if (storageMode === 'ls' || !db) { lsDelete('geckos', id); return Promise.resolve(); }
+  lsDelete('geckos', id); // 双写
+  if (storageMode === 'ls' || !db) return Promise.resolve();
   return new Promise((resolve, reject) => {
     const tx = db.transaction('geckos', 'readwrite');
     const req = tx.objectStore('geckos').delete(id);
@@ -1147,7 +1205,8 @@ function dbDelete(id) {
 }
 
 function dbClear() {
-  if (storageMode === 'ls' || !db) { lsClear('geckos'); return Promise.resolve(); }
+  lsClear('geckos'); // 双写
+  if (storageMode === 'ls' || !db) return Promise.resolve();
   return new Promise((resolve, reject) => {
     const tx = db.transaction('geckos', 'readwrite');
     const req = tx.objectStore('geckos').clear();
@@ -1507,7 +1566,10 @@ function resetForm() {
 function compressImage(dataUrl, maxSizeMB, quality, callback) {
   const img = new Image();
   img.onload = function() {
+    // 先缩放到最大 800px 宽（保持比例），大幅减小体积
+    const MAX_W = 800;
     let w = img.width, h = img.height;
+    if (w > MAX_W) { h = Math.round(h * MAX_W / w); w = MAX_W; }
     const canvas = document.createElement('canvas');
     let q = quality;
     // Try compressing with decreasing quality until under maxSize
@@ -1539,15 +1601,11 @@ function handleImgUpload(event, key) {
   const reader = new FileReader();
   reader.onload = e => {
     const dataUrl = e.target.result;
-    if (file.size > 5 * 1024 * 1024) {
-      compressImage(dataUrl, 5, 0.8, function(compressed) {
-        setImage(key, compressed, file.name);
-        toast('\u2705 \u7167\u7247\u5DF2\u538B\u7F29\u4E0A\u4F20');
-      });
-    } else {
-      setImage(key, dataUrl, file.name);
-      toast('\u2705 \u5DF2\u9009\u62E9\u7167\u7247');
-    }
+    // 统一压缩到 ≤0.5MB + 最大 800px（手机 localStorage 友好，防空间超限丢数据）
+    compressImage(dataUrl, 0.5, 0.75, function(compressed) {
+      setImage(key, compressed, file.name);
+      toast('✅ 照片已压缩上传');
+    });
   };
   reader.readAsDataURL(file);
   event.target.value = '';
@@ -2043,7 +2101,8 @@ function breedDbGetAll(store) {
   });
 }
 function breedDbPut(store, obj) {
-  if (storageMode === 'ls' || !db) { lsPut(store, obj); return Promise.resolve(); }
+  lsPut(store, obj); // 双写：localStorage 始终同步（降级/恢复兜底）
+  if (storageMode === 'ls' || !db) return Promise.resolve();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(store, 'readwrite');
     tx.objectStore(store).put(obj);
@@ -2052,7 +2111,8 @@ function breedDbPut(store, obj) {
   });
 }
 function breedDbDelete(store, id) {
-  if (storageMode === 'ls' || !db) { lsDelete(store, id); return Promise.resolve(); }
+  lsDelete(store, id); // 双写
+  if (storageMode === 'ls' || !db) return Promise.resolve();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(store, 'readwrite');
     tx.objectStore(store).delete(id);
@@ -2584,6 +2644,7 @@ async function breedSaveHatched() {
     if (!e) { toast('⚠️ 蛋不存在'); return; }
     // 已有档案则更新，否则新建
     const geckos = await breedDbGetAll('geckos');
+    const parentsList = await breedDbGetAll('parents'); // 查父母本照片
     const prevId = e.babyId || '';
     const existing = prevId ? geckos.find(x => x.id === prevId) : null;
     const hatchDate = document.getElementById('breedHatchDate').value || new Date().toISOString().slice(0, 10);
@@ -2597,8 +2658,11 @@ async function breedSaveHatched() {
     gecko.notes = document.getElementById('breedHatchNotes').value.trim();
     gecko.image = window._hatchImgData || undefined;
     gecko.name = gecko.id;
-    gecko.father = { name: c.father ? c.father.name : '', geneAbbrs: c.father ? (c.father.geneAbbrs || []) : [], morph: c.father ? (c.father.morph || '') : '' };
-    gecko.mother = { name: c.mother ? c.mother.name : '', geneAbbrs: c.mother ? (c.mother.geneAbbrs || []) : [], morph: c.mother ? (c.mother.morph || '') : '' };
+    // 父母本信息（从窝次 + 亲本库补照片）
+    const fp = parentsList.find(p => c.father && (c.father.parentId === p.id || c.father.name === p.name));
+    const mp = parentsList.find(p => c.mother && (c.mother.parentId === p.id || c.mother.name === p.name));
+    gecko.father = { name: c.father ? c.father.name : '', geneAbbrs: c.father ? (c.father.geneAbbrs || []) : [], morph: c.father ? (c.father.morph || '') : '', image: fp ? fp.image : undefined };
+    gecko.mother = { name: c.mother ? c.mother.name : '', geneAbbrs: c.mother ? (c.mother.geneAbbrs || []) : [], morph: c.mother ? (c.mother.morph || '') : '', image: mp ? mp.image : undefined };
     if (!existing) gecko.createdAt = new Date().toISOString();
     gecko.updatedAt = new Date().toISOString();
     await dbPut(gecko);
