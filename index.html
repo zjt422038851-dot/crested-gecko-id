@@ -570,6 +570,19 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 .parent-actions { display: flex; gap: 6px; flex-shrink: 0; }
 .parent-detail-photo { width: 100%; max-height: 280px; object-fit: cover; border-radius: var(--radius-card); margin-bottom: 12px; background: var(--surface); }
 
+
+/* ====== 繁殖子切换 & 出壳登记 & 蛋二维码 ====== */
+.breed-tabs { display: flex; background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-pill); padding: 3px; margin-bottom: 12px; }
+.breed-tab-btn { flex: 1; padding: 8px 0; border: none; border-radius: var(--radius-pill); background: transparent; font-family: inherit; font-size: 14px; font-weight: 600; color: var(--text3); cursor: pointer; }
+.breed-tab-btn.active { background: var(--accent); color: #fff; }
+.hatch-parents { display: flex; gap: 8px; margin-bottom: 12px; }
+.hatch-parent-box { flex: 1; background: var(--surface); border-radius: var(--radius); padding: 8px 10px; font-size: 13px; }
+.hatch-parent-box .hp-sex { font-size: 11px; color: var(--text3); }
+.hatch-parent-box .hp-name { font-weight: 600; margin-top: 1px; }
+.hatch-parent-box .hp-morph { font-size: 11px; color: var(--text2); margin-top: 1px; }
+.egg-baby-link { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--accent-link); font-weight: 600; cursor: pointer; margin-left: 6px; }
+.egg-qr-btn { font-size: 12px; color: var(--text2); cursor: pointer; margin-left: 8px; }
+
 </style>
 </head>
 <body>
@@ -775,9 +788,6 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
   <button class="tab-btn" data-page="breed" onclick="switchTab('breed')">
     <span class="tab-icon">🥚</span> 繁殖
   </button>
-  <button class="tab-btn" data-page="form" onclick="switchTab('form')">
-    <span class="tab-icon">➕</span> 添加
-  </button>
   <button class="tab-btn" data-page="scanner" onclick="switchTab('scanner')">
     <span class="tab-icon">📷</span> 扫码
   </button>
@@ -792,6 +802,12 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 
 <!-- ====== 繁殖记录 ====== -->
 <div class="page" id="pageBreedList">
+
+<!-- ====== 繁殖子切换（窝次 / 添加睫角） ====== -->
+<div class="breed-tabs" style="margin-top:0">
+  <button class="breed-tab-btn active" id="breedSubClutch" onclick="breedSwitchSub('clutch')">🥚 窝次</button>
+  <button class="breed-tab-btn" id="breedSubAdd" onclick="breedSwitchSub('add')">🦎 添加睫角</button>
+</div>
   <div class="list-toolbar">
     <input id="breedSearchInput" placeholder="搜索父母本 / 窝次编号…" oninput="breedLoadList()">
     <button class="btn btn-primary" onclick="breedShowForm()">➕ 新窝</button>
@@ -931,6 +947,60 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 
 <div class="page" id="pageParentDetail"></div>
 
+
+<!-- ====== 出壳登记弹窗 ====== -->
+<div class="breed-modal-overlay" id="breedHatchModal" onclick="if(event.target===this)breedCloseHatch()">
+  <div class="breed-modal">
+    <h3 id="breedHatchTitle">🐊 出壳登记 · 自动建档</h3>
+    <div class="hatch-parents" id="breedHatchParents"></div>
+    <div class="field" style="margin-bottom:10px">
+      <label>基因 *（决定编号）</label>
+      <div class="gene-chips" id="breedHatchChips"></div>
+    </div>
+    <div class="form-row" style="margin-bottom:10px">
+      <div class="field"><label>性别</label>
+        <select id="breedHatchSex">
+          <option value="female">♀ 雌性</option>
+          <option value="male">♂ 雄性</option>
+          <option value="unknown">❓ 未知</option>
+        </select>
+      </div>
+      <div class="field"><label>体重 (G)</label><input type="number" id="breedHatchWeight" step="0.1" placeholder="如 3.5"></div>
+    </div>
+    <div class="field" style="margin-bottom:10px"><label>破壳日期</label><input type="date" id="breedHatchDate"></div>
+    <div class="form-group">
+      <label class="form-label">📷 照片（可选）</label>
+      <div class="parent-img-upload">
+        <div class="preview empty" id="hatchPreview">📷</div>
+        <div class="img-info" id="hatchImgInfo">未选择照片</div>
+        <div class="img-actions">
+          <button class="btn-add-img" onclick="document.getElementById('hatchImgInput').click()">选择</button>
+          <button class="btn-remove-img" id="hatchRemoveBtn" onclick="removeImg('hatch')" style="display:none;">删除</button>
+        </div>
+        <input type="file" id="hatchImgInput" accept="image/*" onchange="handleImgUpload(event,'hatch')" style="display:none;">
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px"><label>备注</label><textarea id="breedHatchNotes" placeholder="体型、花纹特征…"></textarea></div>
+    <div class="form-actions" style="margin-top:12px">
+      <button class="btn" onclick="breedCloseHatch()">取消</button>
+      <button class="btn btn-primary" onclick="breedSaveHatched()">💾 保存并建档</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== 蛋专属二维码弹窗 ====== -->
+<div class="breed-modal-overlay" id="breedQRModal" onclick="if(event.target===this)breedCloseQR()">
+  <div class="breed-modal" style="align-items:center;text-align:center">
+    <h3 style="width:100%;text-align:left">🔗 蛋专属二维码</h3>
+    <div id="eggQrcode" style="background:#fff;padding:12px;border-radius:8px;margin:8px 0"></div>
+    <div id="eggQRInfo" style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px"></div>
+    <div class="form-actions">
+      <button class="btn" onclick="saveEggQRImage()">📥 保存图片</button>
+      <button class="btn btn-primary" onclick="shareEggQR()">📤 复制链接</button>
+    </div>
+  </div>
+</div>
+
 <!-- 档案选择弹窗 -->
 <div class="breed-modal-overlay" id="breedPickerModal" onclick="if(event.target===this)breedClosePicker()">
   <div class="breed-modal">
@@ -1055,7 +1125,16 @@ function switchTab(name) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('pageBreedList').classList.add('active');
     document.querySelectorAll('.tab-btn').forEach(t => t.classList.toggle('active', t.dataset.page === name));
+    // 重置子切换为「窝次」，隐藏添加睫角表单
+    document.getElementById('breedSubClutch').classList.add('active');
+    document.getElementById('breedSubAdd').classList.remove('active');
+    breedSubTab = 'clutch';
     breedLoadList();
+    return;
+  }
+  if (name === 'form') {
+    // 「添加」已并入繁殖 Tab
+    breedSwitchSub('add');
     return;
   }
   if (name === 'scanner') {
@@ -1105,7 +1184,7 @@ function renderList() {
     });
 
     if (filtered.length === 0 && all.length === 0) {
-      container.innerHTML = '<div class="getting-started"><div class="empty-state"><div class="icon">🦎</div><p>还没有录入睫角数据<br>点击下方 <strong>「添加」</strong> 开始</p></div><div class="step"><span class="step-num">1</span><div class="step-text"><strong>录入信息</strong>输入基因类型，自动生成编号</div></div><div class="step"><span class="step-num">2</span><div class="step-text"><strong>生成二维码</strong>每只睫角自动生成专属二维码</div></div><div class="step"><span class="step-num">3</span><div class="step-text"><strong>扫码识别</strong>用「扫码」功能快速调出信息</div></div></div>';
+      container.innerHTML = '<div class="getting-started"><div class="empty-state"><div class="icon">🦎</div><p>还没有录入睫角数据<br>点击下方 <strong>「繁殖」</strong> 添加</p></div><div class="step"><span class="step-num">1</span><div class="step-text"><strong>录入信息</strong>输入基因类型，自动生成编号</div></div><div class="step"><span class="step-num">2</span><div class="step-text"><strong>生成二维码</strong>每只睫角自动生成专属二维码</div></div><div class="step"><span class="step-num">3</span><div class="step-text"><strong>扫码识别</strong>用「扫码」功能快速调出信息</div></div></div>';
       return;
     }
     if (filtered.length === 0) {
@@ -1506,8 +1585,8 @@ function loadForm(id) {
         document.getElementById(p+'RemoveBtn').style.display = 'inline-block';
       }
     });
-    showPage('form');
-    document.querySelectorAll('.tab-btn').forEach(t => t.classList.toggle('active', t.dataset.page === 'form'));
+    breedShowAddForm();
+    document.querySelectorAll('.tab-btn').forEach(t => t.classList.toggle('active', t.dataset.page === 'breed'));
   });
 }
 
@@ -2150,16 +2229,25 @@ async function breedShowDetail(id) {
 function breedRenderEgg(e, clutchId, idx) {
   const st = BREED_EGG_STATUS[e.status] || BREED_EGG_STATUS.incubating;
   const isHatched = e.status === 'hatched';
+  const baby = e.babyId || '';
+  let nameArea = '<span class="egg-name">蛋 ' + (idx + 1) + '</span> ' +
+    '<span class="status-pill ' + st.cls + '">' + st.label + '</span>';
+  if (isHatched && baby) {
+    nameArea += '<span class="egg-baby-link" onclick="showDetail(\'' + baby + '\')">🦎 ' + esc(baby) + ' 查看</span>';
+  } else if (isHatched && !baby) {
+    nameArea += '<span class="egg-baby-link" onclick="breedOpenHatch(\'' + clutchId + '\',\'' + e.id + '\')">🔗 录入档案</span>';
+  }
   return (
     '<div class="egg-card" data-egg="' + e.id + '">' +
       '<div class="egg-head">' +
-        '<div><span class="egg-name">蛋 ' + (idx + 1) + '</span> ' +
-          '<span class="status-pill ' + st.cls + '">' + st.label + '</span></div>' +
+        '<div>' + nameArea + '</div>' +
         '<div class="egg-actions">' +
-          '<button class="btn btn-sm" onclick="breedMarkEgg(\'' + clutchId + '\',\'' + e.id + '\',\'hatched\')" ' +
-            (isHatched ? 'style="opacity:.4"' : '') + '>🐊 出壳</button>' +
+          (isHatched
+            ? '<button class="btn btn-sm" onclick="breedMarkEgg(\'' + clutchId + '\',\'' + e.id + '\',\'hatched\')">↩️ 取消</button>'
+            : '<button class="btn btn-sm" onclick="breedOpenHatch(\'' + clutchId + '\',\'' + e.id + '\')">🐊 出壳</button>') +
           '<button class="btn btn-sm" onclick="breedMarkEgg(\'' + clutchId + '\',\'' + e.id + '\',\'bad\')" ' +
             (e.status === 'bad' || e.status === 'collapsed' ? 'style="opacity:.4"' : '') + '>💀 坏蛋</button>' +
+          '<button class="btn btn-sm" onclick="showEggQR(\'' + clutchId + '\',' + (idx + 1) + ')" title="蛋二维码">🔗</button>' +
           '<button class="btn btn-sm" onclick="breedRemoveEgg(\'' + clutchId + '\',\'' + e.id + '\')">🗑</button>' +
         '</div>' +
       '</div>' +
@@ -2332,6 +2420,192 @@ function breedPickGecko(id) {
   breedClosePicker();
   toast('✅ 已选择 ' + (p.name || p.id));
 }
+
+
+
+// ====== 繁殖子切换：窝次 / 添加睫角 ======
+let breedSubTab = 'clutch';
+function breedSwitchSub(tab) {
+  breedSubTab = tab;
+  document.getElementById('breedSubClutch').classList.toggle('active', tab === 'clutch');
+  document.getElementById('breedSubAdd').classList.toggle('active', tab === 'add');
+  document.getElementById('pageBreedList').classList.toggle('active', tab === 'clutch');
+  if (tab === 'add') {
+    resetForm();
+    document.getElementById('pageForm').classList.add('active');
+  } else {
+    document.getElementById('pageForm').classList.remove('active');
+    breedLoadList();
+  }
+  window.scrollTo(0, 0);
+}
+// 从繁殖 Tab 进入「添加睫角」（替代原 showPage('form')）
+function breedShowAddForm() {
+  breedSwitchSub('add');
+}
+
+// ====== 出壳登记：自动生成睫角 ======
+let breedHatchState = null; // { clutchId, eggId }
+function breedOpenHatch(clutchId, eggId) {
+  breedDbGetAll('clutches').then(list => {
+    const c = list.find(x => x.id === clutchId);
+    if (!c) return;
+    const e = (c.eggs || []).find(x => x.id === eggId);
+    if (!e) return;
+    breedHatchState = { clutchId, eggId };
+    const f = c.father || {}, m = c.mother || {};
+    document.getElementById('breedHatchParents').innerHTML =
+      '<div class="hatch-parent-box"><div class="hp-sex">♂ 父本</div><div class="hp-name">' + esc(f.name || '—') + '</div>' +
+      (f.morph ? '<div class="hp-morph">' + esc(f.morph) + '</div>' : '') + '</div>' +
+      '<div class="hatch-parent-box"><div class="hp-sex">♀ 母本</div><div class="hp-name">' + esc(m.name || '—') + '</div>' +
+      (m.morph ? '<div class="hp-morph">' + esc(m.morph) + '</div>' : '') + '</div>';
+    const chips = document.getElementById('breedHatchChips');
+    chips.innerHTML = GENE_OPTIONS.map(g =>
+      '<div class="gene-chip-btn" data-abbr="' + g.abbr + '" onclick="breedToggleGene(this)">' +
+        g.label + ' <span class="abbr">' + g.abbr + '</span></div>'
+    ).join('');
+    document.getElementById('breedHatchSex').value = 'unknown';
+    document.getElementById('breedHatchWeight').value = '';
+    document.getElementById('breedHatchDate').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('breedHatchNotes').value = '';
+    window._hatchImgData = null;
+    const prev = document.getElementById('hatchPreview');
+    prev.src = ''; prev.className = 'preview empty'; prev.textContent = '📷';
+    document.getElementById('hatchImgInfo').textContent = '未选择照片';
+    document.getElementById('hatchRemoveBtn').style.display = 'none';
+    // 已建档则预填（补录场景）
+    const prevId = e.babyId || '';
+    if (prevId) {
+      breedDbGetAll('geckos').then(gs => {
+        const g = gs.find(x => x.id === prevId);
+        if (!g) return;
+        const sel = g.geneAbbrs || [];
+        document.querySelectorAll('#breedHatchChips .gene-chip-btn').forEach(el => {
+          el.classList.toggle('selected', sel.includes(el.dataset.abbr));
+        });
+        document.getElementById('breedHatchSex').value = g.sex || 'unknown';
+        document.getElementById('breedHatchWeight').value = g.weight || '';
+        document.getElementById('breedHatchDate').value = g.hatchDate || '';
+        document.getElementById('breedHatchNotes').value = g.notes || '';
+        if (g.image) {
+          window._hatchImgData = g.image;
+          prev.src = g.image; prev.className = 'preview';
+          document.getElementById('hatchImgInfo').textContent = g.name || '已选照片';
+          document.getElementById('hatchRemoveBtn').style.display = 'inline-block';
+        }
+      });
+    }
+    document.getElementById('breedHatchModal').classList.add('show');
+  });
+}
+function breedCloseHatch() {
+  document.getElementById('breedHatchModal').classList.remove('show');
+  breedHatchState = null;
+}
+async function breedSaveHatched() {
+  if (!breedHatchState) return;
+  const { clutchId, eggId } = breedHatchState;
+  try {
+    const selected = Array.from(document.querySelectorAll('#breedHatchChips .gene-chip-btn.selected')).map(c => c.dataset.abbr);
+    if (selected.length === 0) { toast('⚠️ 请选择基因（决定编号）'); return; }
+    const display = computeGeneDisplay(selected.map(a => {
+      const g = GENE_OPTIONS.find(o => o.abbr === a);
+      return g ? { label: g.label, abbr: a } : { label: a, abbr: a };
+    }));
+    const id = await generateIdFromAbbr(display.idAbbr);
+    const clutches = await breedDbGetAll('clutches');
+    const c = clutches.find(x => x.id === clutchId);
+    if (!c) { toast('⚠️ 窝次不存在'); return; }
+    const e = (c.eggs || []).find(x => x.id === eggId);
+    if (!e) { toast('⚠️ 蛋不存在'); return; }
+    // 已有档案则更新，否则新建
+    const geckos = await breedDbGetAll('geckos');
+    const prevId = e.babyId || '';
+    const existing = prevId ? geckos.find(x => x.id === prevId) : null;
+    const hatchDate = document.getElementById('breedHatchDate').value || new Date().toISOString().slice(0, 10);
+    const gecko = existing || { id };
+    gecko.id = existing ? gecko.id : id;
+    gecko.geneAbbrs = selected;
+    gecko.gene = display.label;
+    gecko.sex = document.getElementById('breedHatchSex').value;
+    gecko.weight = document.getElementById('breedHatchWeight').value.trim();
+    gecko.hatchDate = hatchDate;
+    gecko.notes = document.getElementById('breedHatchNotes').value.trim();
+    gecko.image = window._hatchImgData || undefined;
+    gecko.name = gecko.id;
+    gecko.father = { name: c.father ? c.father.name : '', geneAbbrs: c.father ? (c.father.geneAbbrs || []) : [], morph: c.father ? (c.father.morph || '') : '' };
+    gecko.mother = { name: c.mother ? c.mother.name : '', geneAbbrs: c.mother ? (c.mother.geneAbbrs || []) : [], morph: c.mother ? (c.mother.morph || '') : '' };
+    if (!existing) gecko.createdAt = new Date().toISOString();
+    gecko.updatedAt = new Date().toISOString();
+    await dbPut(gecko);
+    // 更新蛋
+    e.status = 'hatched';
+    e.hatchDate = hatchDate;
+    e.babyId = gecko.id;
+    c.updatedAt = new Date().toISOString();
+    await breedDbPut('clutches', c);
+    breedCloseHatch();
+    toast('✅ 已建档 ' + gecko.id);
+    breedShowDetail(clutchId);
+  } catch (err) {
+    toast('❌ 建档失败: ' + err.message);
+  }
+}
+
+// ====== 蛋专属二维码 ======
+let breedQRState = null; // { url, info }
+function showEggQR(clutchId, eggIdx) {
+  breedDbGetAll('clutches').then(list => {
+    const c = list.find(x => x.id === clutchId);
+    if (!c) return;
+    const e = (c.eggs || [])[eggIdx - 1];
+    if (!e) return;
+    const f = c.father || {}, m = c.mother || {};
+    const base = window.location.href.split('#')[0].split('?')[0];
+    const url = base + '?clutch=' + clutchId + '&egg=' + eggIdx;
+    breedQRState = { url };
+    const info = '蛋 ' + eggIdx + ' · ' + e.id + '\n下蛋 ' + (c.laidDate || '—') + ' · ' +
+      (c.temp ? c.temp + '℃' : '') + '\n♂ ' + (f.name || '—') + ' × ♀ ' + (m.name || '—');
+    document.getElementById('eggQRInfo').innerHTML = info.replace(/\n/g, '<br>');
+    const box = document.getElementById('eggQrcode');
+    box.innerHTML = '';
+    new QRCode(box, {
+      text: url,
+      width: 180, height: 180,
+      colorDark: '#0a0a0f',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+    document.getElementById('breedQRModal').classList.add('show');
+  });
+}
+function breedCloseQR() { document.getElementById('breedQRModal').classList.remove('show'); }
+function shareEggQR() {
+  if (!breedQRState) return;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(breedQRState.url).then(() => toast('🔗 链接已复制到剪贴板')).catch(() => toast(breedQRState.url));
+  } else { toast(breedQRState.url); }
+}
+function saveEggQRImage() {
+  const qrEl = document.querySelector('#eggQrcode canvas') || document.querySelector('#eggQrcode img');
+  if (!qrEl) { toast('⚠️ 二维码尚未生成'); return; }
+  const qrSize = qrEl.tagName === 'CANVAS' ? qrEl.width : 180;
+  const padding = 20, textH = 40;
+  const canvas = document.createElement('canvas');
+  canvas.width = qrSize + padding * 2;
+  canvas.height = qrSize + padding * 2 + textH;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(qrEl, padding, padding, qrSize, qrSize);
+  ctx.fillStyle = '#101828'; ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText(breedQRState && breedQRState.url ? decodeURIComponent(breedQRState.url.split('?')[1] || '') : '', canvas.width / 2, canvas.height - 14);
+  const a = document.createElement('a');
+  a.download = 'egg-qr-' + Date.now() + '.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+  toast('📥 二维码图片已保存');
+}
+
 
 // 繁殖模块初始化（复用主 App 的 openDB）
 openDB().then(async () => {
@@ -2555,6 +2829,12 @@ openDB().then(() => {
     dbGet(geckoId).then(g => {
       if (g) showDetail(geckoId);
     });
+  }
+  const clutchParam = params.get('clutch');
+  if (clutchParam) {
+    // 蛋专属二维码：直达该窝次详情
+    switchTab('breed');
+    setTimeout(() => breedShowDetail(clutchParam), 400);
   }
 }).catch(e => {
   document.getElementById('listContent').innerHTML =
