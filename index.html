@@ -1034,6 +1034,8 @@ let storageMode = 'idb'; // 'idb' | 'ls'
 let lsData = null;
 const LS_KEY = 'cg_data_v1';
 function lsLoad() {
+  // 内存优先：会话内已有数据不重新解析（防止存储未同步时覆盖新写入，导致"数据消失"）
+  if (lsData !== null) return lsData;
   try { lsData = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || { geckos: [], clutches: [], parents: [] }; }
   catch (e) { lsData = { geckos: [], clutches: [], parents: [] }; }
   return lsData;
