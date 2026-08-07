@@ -1028,9 +1028,52 @@ const DB_NAME = 'CrestedGeckoDB';
 const DB_VER = 3;
 let db = null;
 
+
+// ====== 存储层：IndexedDB 不可用时自动降级 localStorage ======
+let storageMode = 'idb'; // 'idb' | 'ls'
+let lsData = null;
+const LS_KEY = 'cg_data_v1';
+function lsLoad() {
+  try { lsData = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || { geckos: [], clutches: [], parents: [] }; }
+  catch (e) { lsData = { geckos: [], clutches: [], parents: [] }; }
+  return lsData;
+}
+function lsSave() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(lsData)); }
+  catch (e) { toast('⚠️ 存储空间不足，无法保存'); }
+}
+function useLocalStorage() {
+  if (storageMode === 'ls') return;
+  storageMode = 'ls';
+  lsLoad();
+  console.warn('IndexedDB 不可用，已降级为 localStorage 存储');
+}
+function lsGetAll(store) { lsLoad(); return lsData[store] || []; }
+function lsPut(store, obj) {
+  lsLoad();
+  const arr = lsData[store] || (lsData[store] = []);
+  const i = arr.findIndex(x => x.id === obj.id);
+  if (i >= 0) arr[i] = obj; else arr.push(obj);
+  lsSave();
+}
+function lsDelete(store, id) {
+  lsLoad();
+  lsData[store] = (lsData[store] || []).filter(x => x.id !== id);
+  lsSave();
+}
+function lsClear(store) { lsLoad(); lsData[store] = []; lsSave(); }
+
 function openDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VER);
+  return new Promise((resolve) => {
+    let req;
+    try {
+      req = indexedDB.open(DB_NAME, DB_VER);
+    } catch (e) {
+      // 浏览器不支持/禁用 IndexedDB → 降级 localStorage
+      useLocalStorage();
+      resolve(null);
+      return;
+    }
     req.onupgradeneeded = e => {
       const d = e.target.result;
       if (!d.objectStoreNames.contains('geckos')) {
@@ -1053,21 +1096,19 @@ function openDB() {
       if (/version/i.test(msg)) {
         const fb = indexedDB.open(DB_NAME);
         fb.onsuccess = f => { db = f.target.result; resolve(db); };
-        fb.onerror = () => reject(err || new Error('数据库打开失败'));
+        fb.onerror = () => { useLocalStorage(); resolve(null); };
         return;
       }
-      if (/security|denied|blocked/i.test(msg)) {
-        reject(new Error('浏览器隐私模式或安全设置禁用了数据存储，请退出无痕模式或更换浏览器（推荐 Chrome/Safari）'));
-        return;
-      }
-      reject(err || new Error('数据库打开失败'));
+      // 其余任何失败（隐私模式/禁用/损坏）→ 降级 localStorage
+      useLocalStorage();
+      resolve(null);
     };
   });
 }
 
 function dbGetAll() {
+  if (storageMode === 'ls' || !db) return Promise.resolve(lsGetAll('geckos'));
   return new Promise((resolve, reject) => {
-    if (!db) { reject(new Error('数据库未连接')); return; }
     const tx = db.transaction('geckos', 'readonly');
     const req = tx.objectStore('geckos').getAll();
     req.onsuccess = () => resolve(req.result);
@@ -1076,8 +1117,8 @@ function dbGetAll() {
 }
 
 function dbGet(id) {
+  if (storageMode === 'ls' || !db) return Promise.resolve(lsGetAll('geckos').find(x => x.id === id) || null);
   return new Promise((resolve, reject) => {
-    if (!db) { reject(new Error('数据库未连接')); return; }
     const tx = db.transaction('geckos', 'readonly');
     const req = tx.objectStore('geckos').get(id);
     req.onsuccess = () => resolve(req.result);
@@ -1086,8 +1127,8 @@ function dbGet(id) {
 }
 
 function dbPut(gecko) {
+  if (storageMode === 'ls' || !db) { lsPut('geckos', gecko); return Promise.resolve(); }
   return new Promise((resolve, reject) => {
-    if (!db) { reject(new Error('数据库未连接')); return; }
     const tx = db.transaction('geckos', 'readwrite');
     const req = tx.objectStore('geckos').put(gecko);
     req.onsuccess = () => resolve(req.result);
@@ -1096,8 +1137,8 @@ function dbPut(gecko) {
 }
 
 function dbDelete(id) {
+  if (storageMode === 'ls' || !db) { lsDelete('geckos', id); return Promise.resolve(); }
   return new Promise((resolve, reject) => {
-    if (!db) { reject(new Error('数据库未连接')); return; }
     const tx = db.transaction('geckos', 'readwrite');
     const req = tx.objectStore('geckos').delete(id);
     req.onsuccess = () => resolve();
@@ -1106,6 +1147,7 @@ function dbDelete(id) {
 }
 
 function dbClear() {
+  if (storageMode === 'ls' || !db) { lsClear('geckos'); return Promise.resolve(); }
   return new Promise((resolve, reject) => {
     const tx = db.transaction('geckos', 'readwrite');
     const req = tx.objectStore('geckos').clear();
@@ -1113,6 +1155,7 @@ function dbClear() {
     req.onerror = e => reject(e.target.error);
   });
 }
+
 
 // ====== UUID ======
 function uuid() {
@@ -1989,9 +2032,10 @@ let breedGeckoCache = [];
 let breedParentState = { father: { geckoId: '' }, mother: { geckoId: '' } };
 const breedEggFieldTimers = {};
 
+
 function breedDbGetAll(store) {
+  if (storageMode === 'ls' || !db) return Promise.resolve(lsGetAll(store));
   return new Promise((resolve, reject) => {
-    if (!db) { reject(new Error('数据库未连接')); return; }
     const tx = db.transaction(store, 'readonly');
     const req = tx.objectStore(store).getAll();
     req.onsuccess = () => resolve(req.result);
@@ -1999,8 +2043,8 @@ function breedDbGetAll(store) {
   });
 }
 function breedDbPut(store, obj) {
+  if (storageMode === 'ls' || !db) { lsPut(store, obj); return Promise.resolve(); }
   return new Promise((resolve, reject) => {
-    if (!db) { reject(new Error('数据库未连接')); return; }
     const tx = db.transaction(store, 'readwrite');
     tx.objectStore(store).put(obj);
     tx.oncomplete = () => resolve();
@@ -2008,8 +2052,8 @@ function breedDbPut(store, obj) {
   });
 }
 function breedDbDelete(store, id) {
+  if (storageMode === 'ls' || !db) { lsDelete(store, id); return Promise.resolve(); }
   return new Promise((resolve, reject) => {
-    if (!db) { reject(new Error('数据库未连接')); return; }
     const tx = db.transaction(store, 'readwrite');
     tx.objectStore(store).delete(id);
     tx.oncomplete = () => resolve();
