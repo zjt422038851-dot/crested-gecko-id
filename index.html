@@ -1046,7 +1046,22 @@ function openDB() {
       }
     };
     req.onsuccess = e => { db = e.target.result; resolve(db); };
-    req.onerror = e => reject(e.target.error);
+    req.onerror = e => {
+      const err = e.target && e.target.error;
+      const msg = (err && err.message) || '';
+      // 版本冲突（Service Worker 缓存旧版代码时常见）：降级打开现有库
+      if (/version/i.test(msg)) {
+        const fb = indexedDB.open(DB_NAME);
+        fb.onsuccess = f => { db = f.target.result; resolve(db); };
+        fb.onerror = () => reject(err || new Error('数据库打开失败'));
+        return;
+      }
+      if (/security|denied|blocked/i.test(msg)) {
+        reject(new Error('浏览器隐私模式或安全设置禁用了数据存储，请退出无痕模式或更换浏览器（推荐 Chrome/Safari）'));
+        return;
+      }
+      reject(err || new Error('数据库打开失败'));
+    };
   });
 }
 
@@ -2832,6 +2847,12 @@ function setGeneSelectorAbbrs(selId, abbrs) {
 }
 
 // ====== Init ======
+// Service Worker 注册（network-first 保证更新即时生效；旧缓存会被 activate 清理）
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
 // 全局错误捕获：任何 JS 错误都弹提示，避免"点了没反应"
 window.addEventListener('error', function(e) {
   toast('⚠️ 页面错误: ' + (e.message || '未知错误'));
