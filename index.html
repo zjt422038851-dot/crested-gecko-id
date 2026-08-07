@@ -479,6 +479,97 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+/* ====== 繁殖记录 ====== */
+.breed-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+.breed-stat { background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 10px 12px; text-align: center; box-shadow: var(--shadow-sm); }
+.breed-stat .num { font-size: 20px; font-weight: 700; line-height: 1.2; }
+.breed-stat .lbl { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.list-toolbar { display: flex; gap: 10px; margin-bottom: 12px; }
+.list-toolbar input { flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; font-family: inherit; background: var(--bg-deep); outline: none; }
+.list-toolbar input:focus { border-color: var(--accent); }
+.btn-sm { padding: 6px 12px; font-size: 13px; border-radius: 8px; }
+.card { background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 14px; margin-bottom: 12px; box-shadow: var(--shadow-sm); cursor: pointer; }
+.card:active { background: var(--surface); }
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.clutch-id { font-weight: 700; font-size: 15px; }
+.clutch-date { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.pair-row { display: flex; gap: 8px; margin: 10px 0; }
+.pair-box { flex: 1; background: var(--surface); border-radius: var(--radius); padding: 8px 10px; font-size: 13px; }
+.pair-sex { font-size: 11px; color: var(--text3); }
+.pair-name { font-weight: 600; margin-top: 1px; }
+.pair-morph { font-size: 11px; color: var(--text2); margin-top: 1px; }
+.egg-summary { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.sum-chip { font-size: 11px; padding: 3px 8px; border-radius: var(--radius-pill); background: var(--surface); color: var(--text2); }
+.sum-chip b { font-weight: 700; }
+.st-hatched { background: rgba(247,144,9,0.12); color: #b45309; }
+.st-incubating { background: rgba(90,159,212,0.12); color: #2f6ea5; }
+.st-bad { background: var(--danger-bg); color: var(--danger); }
+.st-infertile { background: rgba(152,162,179,0.14); color: var(--text3); }
+.st-fertile { background: rgba(18,183,106,0.12); color: var(--accent-link); }
+.form-card, .detail-card { background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 16px; margin-bottom: 14px; box-shadow: var(--shadow-sm); }
+.form-card h2, .detail-card h2 { font-size: 16px; margin-bottom: 14px; }
+.breed-section { margin-bottom: 16px; }
+.breed-sec-title { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+.form-row.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 12px; color: var(--text2); font-weight: 500; }
+.field input, .field select, .field textarea { padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; font-family: inherit; background: var(--bg-deep); outline: none; color: var(--text); }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+.field textarea { resize: vertical; min-height: 60px; }
+.parent-box { border: 1px solid var(--border); border-radius: var(--radius-card); padding: 12px; background: var(--bg); margin-bottom: 10px; }
+.parent-box .pb-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.parent-box .pb-title { font-weight: 600; font-size: 14px; }
+.gene-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.form-actions { display: flex; gap: 10px; margin-top: 4px; }
+.form-actions .btn { flex: 1; }
+.est-date-display { padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text3); font-size: 13px; min-height: 42px; display: flex; align-items: center; }
+.est-date-ready { color: var(--accent-link); font-weight: 600; background: rgba(18,183,106,0.06); }
+.detail-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.detail-head h2 { font-size: 18px; margin-bottom: 4px; }
+.detail-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; font-size: 13px; margin-bottom: 12px; }
+.detail-meta .m-item { display: flex; justify-content: space-between; gap: 8px; padding: 6px 10px; background: var(--surface); border-radius: var(--radius); }
+.detail-meta .m-label { color: var(--text3); }
+.detail-meta .m-val { font-weight: 600; text-align: right; }
+.egg-list { display: flex; flex-direction: column; gap: 10px; }
+.egg-card { border: 1px solid var(--border); border-radius: var(--radius-card); padding: 12px; background: var(--bg-deep); }
+.egg-card .egg-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.egg-card .egg-name { font-weight: 600; font-size: 14px; }
+.egg-card .egg-actions { display: flex; gap: 6px; }
+.egg-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.egg-fields.hidden { display: none; }
+.egg-fields .field input { padding: 7px 10px; font-size: 13px; }
+.status-pill { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: var(--radius-pill); display: inline-block; }
+.egg-badge { display: inline-block; width: 22px; height: 22px; line-height: 22px; text-align: center; border-radius: 50%; background: var(--surface); font-size: 12px; font-weight: 700; }
+.breed-modal-overlay { position: fixed; inset: 0; z-index: 300; background: rgba(16,24,40,0.5); display: none; align-items: flex-end; justify-content: center; }
+.breed-modal-overlay.show { display: flex; }
+.breed-modal { background: var(--bg-deep); width: 100%; max-width: 720px; max-height: 80vh; border-radius: 16px 16px 0 0; padding: 16px; display: flex; flex-direction: column; animation: slideUp .2s ease; }
+@keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+.breed-modal h3 { font-size: 15px; margin-bottom: 12px; }
+.breed-modal input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; font-family: inherit; outline: none; margin-bottom: 10px; }
+.breed-modal input:focus { border-color: var(--accent); }
+.picker-list { flex: 1; overflow-y: auto; }
+.picker-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid var(--border); cursor: pointer; }
+.picker-item:active { background: var(--surface); }
+.picker-item .p-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; object-fit: cover; }
+.picker-item .p-info { flex: 1; min-width: 0; }
+.picker-item .p-name { font-weight: 600; font-size: 14px; }
+.picker-item .p-gene { font-size: 12px; color: var(--text2); }
+.picker-item .p-empty { color: var(--text3); font-size: 13px; text-align: center; padding: 24px 0; }
+
+
+/* ====== 亲本库 ====== */
+.parent-tabs { display: flex; background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-pill); padding: 3px; margin-bottom: 12px; }
+.parent-tab-btn { flex: 1; padding: 8px 0; border: none; border-radius: var(--radius-pill); background: transparent; font-family: inherit; font-size: 14px; font-weight: 600; color: var(--text3); cursor: pointer; }
+.parent-tab-btn.active { background: var(--accent); color: #fff; }
+.parent-card { display: flex; align-items: center; gap: 12px; }
+.parent-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; overflow: hidden; }
+.parent-info { flex: 1; min-width: 0; }
+.parent-name { font-weight: 700; font-size: 15px; }
+.parent-morph { font-size: 12px; color: var(--text2); margin-top: 1px; }
+.parent-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.parent-detail-photo { width: 100%; max-height: 280px; object-fit: cover; border-radius: var(--radius-card); margin-bottom: 12px; background: var(--surface); }
+
 </style>
 </head>
 <body>
@@ -552,7 +643,10 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
   <div class="form-row">
     <div class="form-group">
       <label class="form-label">♂ 父亲名字</label>
-      <input class="form-input" id="fDadName" placeholder="火焰">
+      <div style="display:flex;gap:6px">
+        <input class="form-input" id="fDadName" placeholder="火焰" style="flex:1;min-width:0">
+        <button class="btn btn-sm" onclick="parentPickForGecko('dad')" title="从亲本库选择">📖 亲本库</button>
+      </div>
     </div>
     <div class="form-group">
       <label class="form-label">♂ 父本基因</label>
@@ -580,7 +674,10 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
   <div class="form-row">
     <div class="form-group">
       <label class="form-label">♀ 母亲名字</label>
-      <input class="form-input" id="fMomName" placeholder="奶油">
+      <div style="display:flex;gap:6px">
+        <input class="form-input" id="fMomName" placeholder="奶油" style="flex:1;min-width:0">
+        <button class="btn btn-sm" onclick="parentPickForGecko('mom')" title="从亲本库选择">📖 亲本库</button>
+      </div>
     </div>
     <div class="form-group">
       <label class="form-label">♀ 母本基因</label>
@@ -672,6 +769,12 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
   <button class="tab-btn active" data-page="list" onclick="switchTab('list')">
     <span class="tab-icon">📋</span> 列表
   </button>
+  <button class="tab-btn" data-page="parents" onclick="switchTab('parents')">
+    <span class="tab-icon">👪</span> 亲本
+  </button>
+  <button class="tab-btn" data-page="breed" onclick="switchTab('breed')">
+    <span class="tab-icon">🥚</span> 繁殖
+  </button>
   <button class="tab-btn" data-page="form" onclick="switchTab('form')">
     <span class="tab-icon">➕</span> 添加
   </button>
@@ -685,6 +788,157 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 
 <!-- ====== Toast ====== -->
 <div class="toast" id="toast"></div>
+
+
+<!-- ====== 繁殖记录 ====== -->
+<div class="page" id="pageBreedList">
+  <div class="list-toolbar">
+    <input id="breedSearchInput" placeholder="搜索父母本 / 窝次编号…" oninput="breedLoadList()">
+    <button class="btn btn-primary" onclick="breedShowForm()">➕ 新窝</button>
+  </div>
+  <div class="breed-stats" id="breedStats"></div>
+  <div id="breedClutchList"></div>
+  <div id="breedEmptyState" class="empty-state" style="display:none">
+    <div class="icon">🥚</div>
+    <p>还没有繁殖记录<br>点击「新窝」记录第一窝蛋</p>
+  </div>
+</div>
+
+<div class="page" id="pageBreedForm">
+  <div class="form-card">
+    <h2 id="breedFormTitle">新窝记录</h2>
+    <div class="breed-section">
+      <div class="breed-sec-title">👪 父母本</div>
+      <div class="parent-box">
+        <div class="pb-head">
+          <span class="pb-title" style="color:var(--male)">♂ 父本</span>
+          <button class="btn btn-sm" onclick="breedOpenPicker('father')">📖 从亲本库选</button>
+        </div>
+        <div class="form-row" style="margin-bottom:8px">
+          <div class="field">
+            <label>名字 / 编号</label>
+            <input id="breedFatherName" placeholder="如 CP001 或自定义名">
+          </div>
+        </div>
+        <div class="field">
+          <label>基因</label>
+          <div class="gene-chips" id="breedFatherChips"></div>
+        </div>
+      </div>
+      <div class="parent-box">
+        <div class="pb-head">
+          <span class="pb-title" style="color:var(--female)">♀ 母本</span>
+          <button class="btn btn-sm" onclick="breedOpenPicker('mother')">📖 从亲本库选</button>
+        </div>
+        <div class="form-row" style="margin-bottom:8px">
+          <div class="field">
+            <label>名字 / 编号</label>
+            <input id="breedMotherName" placeholder="如 CP002 或自定义名">
+          </div>
+        </div>
+        <div class="field">
+          <label>基因</label>
+          <div class="gene-chips" id="breedMotherChips"></div>
+        </div>
+      </div>
+    </div>
+    <div class="breed-section">
+      <div class="breed-sec-title">🥚 蛋信息</div>
+      <div class="form-row">
+        <div class="field"><label>下蛋日期 *</label><input type="date" id="breedLaidDate" onchange="breedCalcEstDate()"></div>
+        <div class="field"><label>蛋数 *</label><input type="number" id="breedEggCount" min="1" max="20" value="2"></div>
+      </div>
+      <div style="height:10px"></div>
+      <div class="form-row">
+        <div class="field">
+          <label>孵化温度 ℃</label>
+          <input type="number" id="breedIncTemp" step="0.1" placeholder="如 23.5" oninput="breedCalcEstDate()">
+          <div style="font-size:11px;color:var(--text3);line-height:1.5">23℃≈80天 · 23.5℃≈75天<br>24℃≈70天 · 24.5℃≈65天</div>
+        </div>
+        <div class="field">
+          <label>预计出壳日期</label>
+          <div id="breedEstDate" class="est-date-display">填入温度后自动计算</div>
+        </div>
+      </div>
+      <div style="height:10px"></div>
+      <div class="field"><label>备注</label><textarea id="breedNotes" placeholder="配对时间、产蛋位置、体型状态…"></textarea></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn" onclick="breedShowList()">取消</button>
+      <button class="btn btn-primary" onclick="breedSaveClutch()">💾 保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="pageBreedDetail"></div>
+
+
+<!-- ====== 亲本库 ====== -->
+<div class="page" id="pageParents">
+  <div class="parent-tabs">
+    <button class="parent-tab-btn active" id="parentTabFather" onclick="parentSwitchSex('father')">👨 父本</button>
+    <button class="parent-tab-btn" id="parentTabMother" onclick="parentSwitchSex('mother')">👩 母本</button>
+  </div>
+  <div class="list-toolbar">
+    <input id="parentSearchInput" placeholder="搜索亲本名字 / 基因…" oninput="parentLoadList()">
+    <button class="btn btn-primary" onclick="parentShowForm()">➕ 添加</button>
+  </div>
+  <div id="parentList"></div>
+  <div id="parentEmptyState" class="empty-state" style="display:none">
+    <div class="icon">🐾</div>
+    <p id="parentEmptyText">还没有父本<br>点击「添加」记录第一只种公</p>
+  </div>
+</div>
+
+<div class="page" id="pageParentForm">
+  <div class="form-card">
+    <h2 id="parentFormTitle">添加父本</h2>
+    <div class="form-row">
+      <div class="field"><label>名字 / 编号 *</label><input id="parentName" placeholder="如 CP001 或自定义名"></div>
+      <div class="field"><label>类别</label>
+        <select id="parentSex">
+          <option value="father">👨 父本</option>
+          <option value="mother">👩 母本</option>
+        </select>
+      </div>
+    </div>
+    <div style="height:12px"></div>
+    <div class="field">
+      <label>基因</label>
+      <div class="gene-chips" id="parentChips"></div>
+    </div>
+    <div style="height:14px"></div>
+    <div class="form-group">
+      <label class="form-label">📷 照片</label>
+      <div class="parent-img-upload">
+        <div class="preview empty" id="parentPreview">📷</div>
+        <div class="img-info" id="parentImgInfo">未选择照片</div>
+        <div class="img-actions">
+          <button class="btn-add-img" onclick="document.getElementById('parentImgInput').click()">选择</button>
+          <button class="btn-remove-img" id="parentRemoveBtn" onclick="removeImg('parent')" style="display:none;">删除</button>
+        </div>
+        <input type="file" id="parentImgInput" accept="image/*" onchange="handleImgUpload(event,'parent')" style="display:none;">
+      </div>
+    </div>
+    <div style="height:12px"></div>
+    <div class="field"><label>备注</label><textarea id="parentNotes" placeholder="来源、体型、产蛋记录…"></textarea></div>
+    <div class="form-actions" style="margin-top:14px">
+      <button class="btn" onclick="parentShowList()">取消</button>
+      <button class="btn btn-primary" onclick="parentSave()">💾 保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="pageParentDetail"></div>
+
+<!-- 档案选择弹窗 -->
+<div class="breed-modal-overlay" id="breedPickerModal" onclick="if(event.target===this)breedClosePicker()">
+  <div class="breed-modal">
+    <h3>从睫角档案选择</h3>
+    <input id="breedPickerSearch" placeholder="搜索编号 / 基因 / 名字…" oninput="breedRenderPickerList()">
+    <div class="picker-list" id="breedPickerList"></div>
+  </div>
+</div>
 
 <!-- ====== Confirm Modal ====== -->
 <div class="modal-overlay" id="modal">
@@ -701,7 +955,7 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 <script>
 // ====== IndexedDB ======
 const DB_NAME = 'CrestedGeckoDB';
-const DB_VER = 1;
+const DB_VER = 3;
 let db = null;
 
 function openDB() {
@@ -714,6 +968,12 @@ function openDB() {
         store.createIndex('name', 'name', { unique: false });
         store.createIndex('morph', 'morph', { unique: false });
       }
+      if (!d.objectStoreNames.contains('clutches')) {
+        d.createObjectStore('clutches', { keyPath: 'id' });
+      }
+      if (!d.objectStoreNames.contains('parents')) {
+        d.createObjectStore('parents', { keyPath: 'id' });
+      }
     };
     req.onsuccess = e => { db = e.target.result; resolve(db); };
     req.onerror = e => reject(e.target.error);
@@ -722,6 +982,7 @@ function openDB() {
 
 function dbGetAll() {
   return new Promise((resolve, reject) => {
+    if (!db) { reject(new Error('数据库未连接')); return; }
     const tx = db.transaction('geckos', 'readonly');
     const req = tx.objectStore('geckos').getAll();
     req.onsuccess = () => resolve(req.result);
@@ -731,6 +992,7 @@ function dbGetAll() {
 
 function dbGet(id) {
   return new Promise((resolve, reject) => {
+    if (!db) { reject(new Error('数据库未连接')); return; }
     const tx = db.transaction('geckos', 'readonly');
     const req = tx.objectStore('geckos').get(id);
     req.onsuccess = () => resolve(req.result);
@@ -740,6 +1002,7 @@ function dbGet(id) {
 
 function dbPut(gecko) {
   return new Promise((resolve, reject) => {
+    if (!db) { reject(new Error('数据库未连接')); return; }
     const tx = db.transaction('geckos', 'readwrite');
     const req = tx.objectStore('geckos').put(gecko);
     req.onsuccess = () => resolve(req.result);
@@ -749,6 +1012,7 @@ function dbPut(gecko) {
 
 function dbDelete(id) {
   return new Promise((resolve, reject) => {
+    if (!db) { reject(new Error('数据库未连接')); return; }
     const tx = db.transaction('geckos', 'readwrite');
     const req = tx.objectStore('geckos').delete(id);
     req.onsuccess = () => resolve();
@@ -780,6 +1044,20 @@ function showPage(name) {
 }
 
 function switchTab(name) {
+  if (name === 'parents') {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('pageParents').classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(t => t.classList.toggle('active', t.dataset.page === name));
+    parentLoadList();
+    return;
+  }
+  if (name === 'breed') {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('pageBreedList').classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(t => t.classList.toggle('active', t.dataset.page === name));
+    breedLoadList();
+    return;
+  }
   if (name === 'scanner') {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('pageScanner').classList.add('active');
@@ -1040,7 +1318,7 @@ function updateGenePreview() {
 
 function generateIdFromAbbr(abbr) {
   if (!abbr) return Promise.resolve('');
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     dbGetAll().then(all => {
       const existing = all.filter(g => g.id && g.id.startsWith(abbr))
         .map(g => parseInt(g.id.replace(abbr,''), 10))
@@ -1048,7 +1326,7 @@ function generateIdFromAbbr(abbr) {
       const max = existing.length ? Math.max(...existing) : 0;
       const num = String(max + 1).padStart(3, '0');
       resolve(abbr + num);
-    });
+    }).catch(reject);
   });
 }
 
@@ -1276,30 +1554,34 @@ function collectForm() {
   }
 
 async function saveGecko() {
-  const data = collectForm();
-  if (!data.gene) { toast('\u26A0\uFE0F \u8BF7\u9009\u62E9\u81F3\u5C11\u4E00\u4E2A\u57FA\u56E0'); return; }
+  try {
+    const data = collectForm();
+    if (!data.gene) { toast('\u26A0\uFE0F \u8BF7\u9009\u62E9\u81F3\u5C11\u4E00\u4E2A\u57FA\u56E0'); return; }
 
-  let id = editingId;
-  if (!id) {
-    const selected = getSelectedGenes();
-    const display = computeGeneDisplay(selected);
-    id = await generateIdFromAbbr(display.idAbbr);
+    let id = editingId;
+    if (!id) {
+      const selected = getSelectedGenes();
+      const display = computeGeneDisplay(selected);
+      id = await generateIdFromAbbr(display.idAbbr);
+    }
+
+    const gecko = {
+      id,
+      ...data,
+      name: id,
+      createdAt: editingId ? undefined : new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    dbPut(gecko).then(() => {
+      toast('\u2705 \u4FDD\u5B58\u6210\u529F\uFF01\u7F16\u53F7: ' + id);
+      resetForm();
+      showPage('list');
+      renderList();
+    }).catch(e => { toast('\u274C \u4FDD\u5B58\u5931\u8D25: '+e.message); });
+  } catch (e) {
+    toast('\u274C \u4FDD\u5B58\u5931\u8D25: ' + e.message);
   }
-
-  const gecko = {
-    id,
-    ...data,
-    name: id,
-    createdAt: editingId ? undefined : new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-
-  dbPut(gecko).then(() => {
-    toast('\u2705 \u4FDD\u5B58\u6210\u529F\uFF01\u7F16\u53F7: ' + id);
-    resetForm();
-    showPage('list');
-    renderList();
-  }).catch(e => { toast('\u274C \u4FDD\u5B58\u5931\u8D25: '+e.message); });
 }
 
 function deleteFromList(id) {
@@ -1586,9 +1868,685 @@ function confirmClear() {
   });
 }
 
+
+// ====== 繁殖记录模块 ======
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+const BREED_EGG_STATUS = {
+  incubating: { label: '孵化中', cls: 'st-incubating' },
+  fertile:    { label: '受精', cls: 'st-fertile' },
+  infertile:  { label: '未受精', cls: 'st-infertile' },
+  hatched:    { label: '已出壳', cls: 'st-hatched' },
+  bad:        { label: '坏蛋', cls: 'st-bad' },
+  collapsed:  { label: '塌陷', cls: 'st-bad' }
+};
+let breedEditingId = null;
+let breedViewingId = null;
+let breedPickerTarget = null;
+let breedGeckoCache = [];
+let breedParentState = { father: { geckoId: '' }, mother: { geckoId: '' } };
+const breedEggFieldTimers = {};
+
+function breedDbGetAll(store) {
+  return new Promise((resolve, reject) => {
+    if (!db) { reject(new Error('数据库未连接')); return; }
+    const tx = db.transaction(store, 'readonly');
+    const req = tx.objectStore(store).getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = e => reject(e.target.error);
+  });
+}
+function breedDbPut(store, obj) {
+  return new Promise((resolve, reject) => {
+    if (!db) { reject(new Error('数据库未连接')); return; }
+    const tx = db.transaction(store, 'readwrite');
+    tx.objectStore(store).put(obj);
+    tx.oncomplete = () => resolve();
+    tx.onerror = e => reject(e.target.error);
+  });
+}
+function breedDbDelete(store, id) {
+  return new Promise((resolve, reject) => {
+    if (!db) { reject(new Error('数据库未连接')); return; }
+    const tx = db.transaction(store, 'readwrite');
+    tx.objectStore(store).delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = e => reject(e.target.error);
+  });
+}
+
+// 基因显示：复用主 App 的 GENE_OPTIONS + computeGeneDisplay
+function breedGeneLabelFromAbbrs(abbrs) {
+  if (!abbrs || abbrs.length === 0) return '';
+  const sel = abbrs.map(a => {
+    const g = GENE_OPTIONS.find(o => o.abbr === a);
+    return g ? { label: g.label, abbr: a } : { label: a, abbr: a };
+  });
+  return computeGeneDisplay(sel).label;
+}
+function breedToggleGene(el) { el.classList.toggle('selected'); }
+
+function breedSwitchView(name) {
+  ['List', 'Form', 'Detail'].forEach(v => {
+    document.getElementById('pageBreed' + v).classList.toggle('active', v === name);
+  });
+  if (name === 'List') breedLoadList();
+  window.scrollTo(0, 0);
+}
+function breedShowList() { breedEditingId = null; breedSwitchView('List'); }
+function breedShowForm(id) {
+  breedEditingId = id || null;
+  document.getElementById('breedFormTitle').textContent = id ? '✏️ 编辑窝次 ' + id : '新窝记录';
+  ['father', 'mother'].forEach(role => {
+    const chipsEl = document.getElementById('breed' + role.charAt(0).toUpperCase() + role.slice(1) + 'Chips');
+    chipsEl.innerHTML = GENE_OPTIONS.map(g =>
+      '<div class="gene-chip-btn" data-abbr="' + g.abbr + '" onclick="breedToggleGene(this)">' +
+        g.label + ' <span class="abbr">' + g.abbr + '</span>' +
+      '</div>'
+    ).join('');
+  });
+  breedParentState = { father: { geckoId: '', parentId: '' }, mother: { geckoId: '', parentId: '' } };
+  document.getElementById('breedFatherName').value = '';
+  document.getElementById('breedMotherName').value = '';
+  document.getElementById('breedLaidDate').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('breedEggCount').value = 2;
+  document.getElementById('breedEggCount').disabled = false;
+  document.getElementById('breedIncTemp').value = '';
+  document.getElementById('breedNotes').value = '';
+  breedCalcEstDate();
+  if (id) {
+    breedDbGetAll('clutches').then(list => {
+      const c = list.find(x => x.id === id);
+      if (c) breedFillForm(c);
+    });
+  }
+  breedSwitchView('Form');
+}
+function breedFillForm(c) {
+  ['father', 'mother'].forEach(role => {
+    const cap = role.charAt(0).toUpperCase() + role.slice(1);
+    const p = c[role] || {};
+    document.getElementById('breed' + cap + 'Name').value = p.name || '';
+    breedParentState[role].geckoId = p.geckoId || '';
+    breedParentState[role].parentId = p.parentId || '';
+    const sel = p.geneAbbrs || [];
+    document.querySelectorAll('#breed' + cap + 'Chips .gene-chip-btn').forEach(el => {
+      el.classList.toggle('selected', sel.includes(el.dataset.abbr));
+    });
+  });
+  document.getElementById('breedLaidDate').value = c.laidDate || '';
+  document.getElementById('breedEggCount').value = (c.eggs || []).length || 2;
+  document.getElementById('breedEggCount').disabled = true;
+  document.getElementById('breedIncTemp').value = c.temp || '';
+  document.getElementById('breedNotes').value = c.notes || '';
+  breedCalcEstDate();
+}
+function breedGetParentData(role) {
+  const cap = role.charAt(0).toUpperCase() + role.slice(1);
+  const name = document.getElementById('breed' + cap + 'Name').value.trim();
+  const chips = document.querySelectorAll('#breed' + cap + 'Chips .gene-chip-btn.selected');
+  const abbrs = Array.from(chips).map(c => c.dataset.abbr);
+  return { parentId: breedParentState[role].parentId || '', geckoId: breedParentState[role].geckoId || '', name, geneAbbrs: abbrs, morph: breedGeneLabelFromAbbrs(abbrs) };
+}
+function breedNextClutchId(list) {
+  const nums = list.filter(c => /^C\d+$/.test(c.id)).map(c => parseInt(c.id.slice(1), 10));
+  const max = nums.length ? Math.max(...nums) : 0;
+  return 'C' + String(max + 1).padStart(3, '0');
+}
+async function breedSaveClutch() {
+  try {
+    const father = breedGetParentData('father');
+    const mother = breedGetParentData('mother');
+    const laidDate = document.getElementById('breedLaidDate').value;
+    const temp = document.getElementById('breedIncTemp').value.trim();
+    const notes = document.getElementById('breedNotes').value.trim();
+    if (!laidDate) { toast('⚠️ 请选择下蛋日期'); return; }
+    if (!father.name && !mother.name) { toast('⚠️ 请填写至少一位父母本信息'); return; }
+    const list = await breedDbGetAll('clutches');
+    let clutch;
+    if (breedEditingId) {
+      clutch = list.find(x => x.id === breedEditingId);
+      if (!clutch) { toast('⚠️ 记录不存在'); return; }
+      clutch.father = father; clutch.mother = mother;
+      clutch.laidDate = laidDate; clutch.temp = temp;
+      clutch.notes = notes;
+      clutch.updatedAt = new Date().toISOString();
+    } else {
+      const id = breedNextClutchId(list);
+      const eggCount = Math.min(Math.max(parseInt(document.getElementById('breedEggCount').value, 10) || 2, 1), 20);
+      const eggs = [];
+      for (let i = 1; i <= eggCount; i++) {
+        eggs.push({ id: id + '-' + i, status: 'incubating', hatchDate: '', babyId: '' });
+      }
+      clutch = { id, father, mother, laidDate, temp, notes, eggs,
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    }
+    await breedDbPut('clutches', clutch);
+    toast('✅ 已保存 ' + clutch.id);
+    breedEditingId = null;
+    breedShowDetail(clutch.id);
+  } catch (e) {
+    toast('❌ 保存失败: ' + e.message);
+  }
+}
+
+async function breedLoadList() {
+  const list = await breedDbGetAll('clutches');
+  list.sort((a, b) => (b.laidDate || '').localeCompare(a.laidDate || ''));
+  breedRenderStats(list);
+  const kw = document.getElementById('breedSearchInput').value.trim().toLowerCase();
+  const filtered = kw ? list.filter(c => {
+    const hay = (c.id + ' ' + (c.father ? c.father.name + ' ' + (c.father.geneAbbrs || []).join(' ') : '') +
+      ' ' + (c.mother ? c.mother.name + ' ' + (c.mother.geneAbbrs || []).join(' ') : '')).toLowerCase();
+    return hay.includes(kw);
+  }) : list;
+  const container = document.getElementById('breedClutchList');
+  const empty = document.getElementById('breedEmptyState');
+  if (filtered.length === 0) {
+    container.innerHTML = '';
+    empty.style.display = (list.length === 0) ? 'block' : 'none';
+    if (list.length > 0) {
+      container.innerHTML = '<div class="empty-state" style="padding:40px 0"><div class="icon">🔍</div><p>没有匹配的记录</p></div>';
+    }
+    return;
+  }
+  empty.style.display = 'none';
+  container.innerHTML = filtered.map(c => breedRenderCard(c)).join('');
+}
+function breedRenderStats(list) {
+  const active = list.filter(c => (c.eggs || []).some(e => e.status === 'incubating' || e.status === 'fertile')).length;
+  const incubating = list.reduce((s, c) => s + (c.eggs || []).filter(e => e.status === 'incubating' || e.status === 'fertile').length, 0);
+  const hatched = list.reduce((s, c) => s + (c.eggs || []).filter(e => e.status === 'hatched').length, 0);
+  document.getElementById('breedStats').innerHTML =
+    '<div class="breed-stat"><div class="num">' + active + '</div><div class="lbl">进行中窝次</div></div>' +
+    '<div class="breed-stat"><div class="num">' + incubating + '</div><div class="lbl">孵化中蛋</div></div>' +
+    '<div class="breed-stat"><div class="num">' + hatched + '</div><div class="lbl">累计出壳</div></div>';
+}
+function breedRenderCard(c) {
+  const f = c.father || {};
+  const m = c.mother || {};
+  const eggs = c.eggs || [];
+  const hatched = eggs.filter(e => e.status === 'hatched').length;
+  const incubating = eggs.filter(e => e.status === 'incubating' || e.status === 'fertile').length;
+  const bad = eggs.filter(e => e.status === 'bad' || e.status === 'collapsed').length;
+  const infertile = eggs.filter(e => e.status === 'infertile').length;
+  let summary = '<div class="egg-summary">';
+  summary += '<span class="sum-chip">共 <b>' + eggs.length + '</b> 枚</span>';
+  if (incubating) summary += '<span class="sum-chip st-incubating">孵化中 <b>' + incubating + '</b></span>';
+  if (hatched) summary += '<span class="sum-chip st-hatched">已出壳 <b>' + hatched + '</b></span>';
+  if (infertile) summary += '<span class="sum-chip st-infertile">未受精 <b>' + infertile + '</b></span>';
+  if (bad) summary += '<span class="sum-chip st-bad">损坏 <b>' + bad + '</b></span>';
+  summary += '</div>';
+  return (
+    '<div class="card" onclick="breedShowDetail(\'' + c.id + '\')">' +
+      '<div class="card-top">' +
+        '<div><div class="clutch-id">' + esc(c.id) + '</div>' +
+        '<div class="clutch-date">下蛋日期 ' + esc(c.laidDate || '—') + (c.temp ? ' · ' + esc(c.temp) + '℃' : '') + '</div></div>' +
+        '<span class="egg-badge">' + eggs.length + '</span>' +
+      '</div>' +
+      '<div class="pair-row">' +
+        '<div class="pair-box"><div class="pair-sex">♂ 父本</div><div class="pair-name">' + esc(f.name || '—') + '</div>' +
+          (f.morph ? '<div class="pair-morph">' + esc(f.morph) + '</div>' : '') + '</div>' +
+        '<div class="pair-box"><div class="pair-sex">♀ 母本</div><div class="pair-name">' + esc(m.name || '—') + '</div>' +
+          (m.morph ? '<div class="pair-morph">' + esc(m.morph) + '</div>' : '') + '</div>' +
+      '</div>' + summary +
+    '</div>'
+  );
+}
+
+async function breedShowDetail(id) {
+  breedViewingId = id;
+  const list = await breedDbGetAll('clutches');
+  const c = list.find(x => x.id === id);
+  if (!c) { toast('⚠️ 记录不存在'); breedShowList(); return; }
+  const f = c.father || {};
+  const m = c.mother || {};
+  const eggs = c.eggs || [];
+  const hatched = eggs.filter(e => e.status === 'hatched').length;
+  const incubating = eggs.filter(e => e.status === 'incubating' || e.status === 'fertile').length;
+  const bad = eggs.filter(e => e.status === 'bad' || e.status === 'collapsed').length;
+  const infertile = eggs.filter(e => e.status === 'infertile').length;
+  const days = breedDaysSince(c.laidDate);
+  const est = breedEstHatchDate(c.laidDate, c.temp);
+  document.getElementById('pageBreedDetail').innerHTML =
+    '<div class="detail-card">' +
+      '<div class="detail-head">' +
+        '<div><h2>' + esc(c.id) + '</h2>' +
+        '<div style="font-size:13px;color:var(--text3)">' +
+          (hatched ? '<span class="status-pill st-hatched" style="margin-right:4px">已出壳 ' + hatched + '</span>' : '') +
+          (incubating ? '<span class="status-pill st-incubating" style="margin-right:4px">孵化中 ' + incubating + '</span>' : '') +
+          (infertile ? '<span class="status-pill st-infertile" style="margin-right:4px">未受精 ' + infertile + '</span>' : '') +
+          (bad ? '<span class="status-pill st-bad">损坏 ' + bad + '</span>' : '') +
+        '</div></div>' +
+        '<div style="display:flex;gap:6px;flex-shrink:0">' +
+          '<button class="btn btn-sm" onclick="breedShowForm(\'' + c.id + '\')">✏️</button>' +
+          '<button class="btn btn-sm btn-danger" onclick="breedDeleteClutch(\'' + c.id + '\')">🗑</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="detail-meta">' +
+        '<div class="m-item"><span class="m-label">下蛋日期</span><span class="m-val">' + esc(c.laidDate || '—') + '</span></div>' +
+        '<div class="m-item"><span class="m-label">孵化天数</span><span class="m-val">' + (days === null ? '—' : days + ' 天') + '</span></div>' +
+        (c.temp ? '<div class="m-item"><span class="m-label">温度</span><span class="m-val">' + esc(c.temp) + ' ℃</span></div>' : '') +
+        (est ? '<div class="m-item"><span class="m-label">预计出壳</span><span class="m-val">' + est + '</span></div>' : '') +
+        (f.name || m.name ? '<div class="m-item" style="grid-column:1/-1"><span class="m-label">亲本</span><span class="m-val">♂ ' + esc(f.name || '—') + (f.morph ? ' (' + esc(f.morph) + ')' : '') + ' × ♀ ' + esc(m.name || '—') + (m.morph ? ' (' + esc(m.morph) + ')' : '') + '</span></div>' : '') +
+      '</div>' +
+      (c.notes ? '<div style="font-size:13px;color:var(--text2);background:var(--surface);border-radius:var(--radius);padding:8px 12px;margin-bottom:12px">📝 ' + esc(c.notes) + '</div>' : '') +
+    '</div>' +
+    '<div class="detail-card">' +
+      '<div class="breed-sec-title" style="margin-bottom:12px">' +
+        '🥚 蛋记录' +
+        '<button class="btn btn-sm" onclick="breedAddEgg(\'' + c.id + '\')">+ 添加蛋</button>' +
+      '</div>' +
+      '<div class="egg-list">' + eggs.map((e, i) => breedRenderEgg(e, c.id, i)).join('') + '</div>' +
+    '</div>' +
+    '<div style="text-align:center;margin:6px 0 20px">' +
+      '<button class="btn" onclick="breedShowList()">← 返回列表</button>' +
+    '</div>';
+  breedSwitchView('Detail');
+}
+function breedRenderEgg(e, clutchId, idx) {
+  const st = BREED_EGG_STATUS[e.status] || BREED_EGG_STATUS.incubating;
+  const isHatched = e.status === 'hatched';
+  return (
+    '<div class="egg-card" data-egg="' + e.id + '">' +
+      '<div class="egg-head">' +
+        '<div><span class="egg-name">蛋 ' + (idx + 1) + '</span> ' +
+          '<span class="status-pill ' + st.cls + '">' + st.label + '</span></div>' +
+        '<div class="egg-actions">' +
+          '<button class="btn btn-sm" onclick="breedMarkEgg(\'' + clutchId + '\',\'' + e.id + '\',\'hatched\')" ' +
+            (isHatched ? 'style="opacity:.4"' : '') + '>🐊 出壳</button>' +
+          '<button class="btn btn-sm" onclick="breedMarkEgg(\'' + clutchId + '\',\'' + e.id + '\',\'bad\')" ' +
+            (e.status === 'bad' || e.status === 'collapsed' ? 'style="opacity:.4"' : '') + '>💀 坏蛋</button>' +
+          '<button class="btn btn-sm" onclick="breedRemoveEgg(\'' + clutchId + '\',\'' + e.id + '\')">🗑</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="egg-fields' + (isHatched ? '' : ' hidden') + '">' +
+        '<div class="field"><label>出壳日期</label>' +
+          '<input type="date" value="' + esc(e.hatchDate || '') + '" oninput="breedUpdateEggField(\'' + clutchId + '\',\'' + e.id + '\',\'hatchDate\',this.value)"></div>' +
+        '<div class="field"><label>出壳编号</label>' +
+          '<input placeholder="如 CP003" value="' + esc(e.babyId || '') + '" oninput="breedUpdateEggField(\'' + clutchId + '\',\'' + e.id + '\',\'babyId\',this.value)"></div>' +
+      '</div>' +
+    '</div>'
+  );
+}
+function breedDaysSince(dateStr) {
+  if (!dateStr) return null;
+  const t = new Date(dateStr + 'T00:00:00');
+  if (isNaN(t.getTime())) return null;
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  return Math.round((now - t) / 86400000);
+}
+// 温度 → 孵化天数：23℃→80天 / 23.5℃→75天 / 24℃→70天 / 24.5℃→65天（线性：每 +0.5℃ -5 天）
+function breedDaysFromTemp(temp) {
+  if (temp === '' || temp == null || isNaN(parseFloat(temp))) return null;
+  const t = parseFloat(temp);
+  let days = Math.round(80 - (t - 23) * 10);
+  days = Math.max(55, Math.min(95, days)); // 合理范围钳制
+  return days;
+}
+// 表单实时计算预计出壳日期（下蛋日期 + 温度对应天数）
+function breedCalcEstDate() {
+  const laid = document.getElementById('breedLaidDate').value;
+  const temp = document.getElementById('breedIncTemp').value;
+  const box = document.getElementById('breedEstDate');
+  const days = breedDaysFromTemp(temp);
+  if (!laid || days === null) {
+    box.textContent = '填入温度后自动计算';
+    box.className = 'est-date-display';
+    return;
+  }
+  const t = new Date(laid + 'T00:00:00');
+  if (isNaN(t.getTime())) return;
+  t.setDate(t.getDate() + days);
+  const y = t.getFullYear(), mo = String(t.getMonth() + 1).padStart(2, '0'), d = String(t.getDate()).padStart(2, '0');
+  box.textContent = y + '-' + mo + '-' + d + '（约 ' + days + ' 天）';
+  box.className = 'est-date-display est-date-ready';
+}
+function breedEstHatchDate(dateStr, temp) {
+  const days = breedDaysFromTemp(temp);
+  if (!dateStr || days === null) return null;
+  const t = new Date(dateStr + 'T00:00:00');
+  if (isNaN(t.getTime())) return null;
+  t.setDate(t.getDate() + days);
+  const y = t.getFullYear(), mo = String(t.getMonth() + 1).padStart(2, '0'), d = String(t.getDate()).padStart(2, '0');
+  return y + '-' + mo + '-' + d + ' (~' + days + '天)';
+}
+function breedUpdateEggField(clutchId, eggId, field, value) {
+  const key = clutchId + '_' + eggId + '_' + field;
+  clearTimeout(breedEggFieldTimers[key]);
+  breedEggFieldTimers[key] = setTimeout(() => {
+    breedDbGetAll('clutches').then(list => {
+      const c = list.find(x => x.id === clutchId);
+      if (!c) return;
+      const e = (c.eggs || []).find(x => x.id === eggId);
+      if (!e) return;
+      e[field] = value;
+      c.updatedAt = new Date().toISOString();
+      breedDbPut('clutches', c);
+    });
+  }, 500);
+}
+function breedMarkEgg(clutchId, eggId, status) {
+  breedDbGetAll('clutches').then(list => {
+    const c = list.find(x => x.id === clutchId);
+    if (!c) return;
+    const e = (c.eggs || []).find(x => x.id === eggId);
+    if (!e) return;
+    if (status === 'hatched' && e.status !== 'hatched') {
+      e.status = 'hatched';
+      e.hatchDate = e.hatchDate || new Date().toISOString().slice(0, 10);
+    } else if (status === 'hatched' && e.status === 'hatched') {
+      e.status = 'incubating';
+    } else if (status === 'bad') {
+      e.status = (e.status === 'bad' || e.status === 'collapsed') ? 'incubating' : 'bad';
+    }
+    c.updatedAt = new Date().toISOString();
+    breedDbPut('clutches', c).then(() => breedShowDetail(clutchId));
+  });
+}
+function breedAddEgg(clutchId) {
+  breedDbGetAll('clutches').then(list => {
+    const c = list.find(x => x.id === clutchId);
+    if (!c) return;
+    const eggs = c.eggs || [];
+    eggs.push({ id: clutchId + '-' + (eggs.length + 1), status: 'incubating', hatchDate: '', babyId: '' });
+    c.updatedAt = new Date().toISOString();
+    breedDbPut('clutches', c).then(() => breedShowDetail(clutchId));
+  });
+}
+function breedRemoveEgg(clutchId, eggId) {
+  breedDbGetAll('clutches').then(list => {
+    const c = list.find(x => x.id === clutchId);
+    if (!c) return;
+    c.eggs = (c.eggs || []).filter(x => x.id !== eggId);
+    c.updatedAt = new Date().toISOString();
+    breedDbPut('clutches', c).then(() => breedShowDetail(clutchId));
+  });
+}
+function breedDeleteClutch(id) {
+  if (!confirm('确定删除窝次 ' + id + ' 吗？此操作不可恢复')) return;
+  breedDbDelete('clutches', id).then(() => { toast('已删除'); breedShowList(); });
+}
+
+// 亲本库选择弹窗（每次打开实时拉取，按性别过滤）
+function breedOpenPicker(role) {
+  breedPickerTarget = role;
+  window._geckoPickRole = null;
+  document.getElementById('breedPickerModal').classList.add('show');
+  document.getElementById('breedPickerSearch').value = '';
+  breedDbGetAll('parents').then(list => {
+    breedGeckoCache = list.filter(p => p.sex === role);
+    breedRenderPickerList();
+  });
+}
+function breedClosePicker() {
+  document.getElementById('breedPickerModal').classList.remove('show');
+}
+function breedRenderPickerList() {
+  const kw = document.getElementById('breedPickerSearch').value.trim().toLowerCase();
+  const list = breedGeckoCache.filter(p => {
+    const hay = ((p.id || '') + ' ' + (p.name || '') + ' ' + (p.morph || '') + ' ' + (p.geneAbbrs || []).join(' ')).toLowerCase();
+    return hay.includes(kw);
+  }).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  const box = document.getElementById('breedPickerList');
+  if (list.length === 0) {
+    box.innerHTML = '<div class="p-empty">亲本库暂无' + (breedPickerTarget === 'father' ? '父本' : '母本') + '，请先到「👪 亲本」Tab 添加</div>';
+    return;
+  }
+  box.innerHTML = list.map(p => {
+    const gene = p.geneAbbrs && p.geneAbbrs.length ? breedGeneLabelFromAbbrs(p.geneAbbrs) : (p.morph || '');
+    const avatar = p.image ? '<img class="p-avatar" src="' + p.image + '">' : '<div class="p-avatar">' + (p.sex === 'father' ? '👨' : '👩') + '</div>';
+    return (
+      '<div class="picker-item" onclick="breedPickGecko(\'' + p.id + '\')">' + avatar +
+        '<div class="p-info"><div class="p-name">' + esc(p.name || p.id) + '</div>' +
+        (gene ? '<div class="p-gene">' + esc(gene) + '</div>' : '') + '</div>' +
+      '</div>'
+    );
+  }).join('');
+}
+function breedPickGecko(id) {
+  const p = breedGeckoCache.find(x => x.id === id);
+  if (!p) return;
+  if (window._geckoPickRole) {
+    // 目标：档案表单（fDadName/fMomName + 基因下拉 + 照片）
+    const role = window._geckoPickRole; // 'dad' | 'mom'
+    const cap = role === 'dad' ? 'Dad' : 'Mom';
+    document.getElementById('f' + cap + 'Name').value = p.name || p.id;
+    setGeneSelectorAbbrs(role === 'dad' ? 'dadGeneSelector' : 'momGeneSelector', p.geneAbbrs || []);
+    if (p.image) setImage(role, p.image, p.name);
+    window._geckoPickRole = null;
+  } else {
+    // 目标：繁殖表单
+    const role = breedPickerTarget;
+    const cap = role.charAt(0).toUpperCase() + role.slice(1);
+    document.getElementById('breed' + cap + 'Name').value = p.name || p.id;
+    breedParentState[role].parentId = p.id;
+    document.querySelectorAll('#breed' + cap + 'Chips .gene-chip-btn').forEach(el => {
+      el.classList.toggle('selected', (p.geneAbbrs || []).includes(el.dataset.abbr));
+    });
+  }
+  breedClosePicker();
+  toast('✅ 已选择 ' + (p.name || p.id));
+}
+
+// 繁殖模块初始化（复用主 App 的 openDB）
+openDB().then(async () => {
+  breedGeckoCache = await breedDbGetAll('geckos');
+}).catch(e => console.error('breed init failed', e));
+
+
+
+// ====== 亲本库模块 ======
+let parentListSex = 'father';
+let parentEditingId = null;
+let parentViewingId = null;
+
+function parentSwitchSex(sex) {
+  parentListSex = sex;
+  document.getElementById('parentTabFather').classList.toggle('active', sex === 'father');
+  document.getElementById('parentTabMother').classList.toggle('active', sex === 'mother');
+  document.getElementById('parentEmptyText').innerHTML =
+    (sex === 'father' ? '还没有父本' : '还没有母本') + '<br>点击「添加」记录第一只' + (sex === 'father' ? '种公' : '种母');
+  parentLoadList();
+}
+function parentSwitchView(name) {
+  ['Parents', 'ParentForm', 'ParentDetail'].forEach(v => {
+    document.getElementById('page' + v).classList.toggle('active', v === name);
+  });
+  if (name === 'Parents') parentLoadList();
+  window.scrollTo(0, 0);
+}
+function parentShowList() { parentEditingId = null; parentSwitchView('Parents'); }
+function parentShowForm(id) {
+  parentEditingId = id || null;
+  document.getElementById('parentFormTitle').textContent = id ? '✏️ 编辑亲本' : (parentListSex === 'father' ? '添加父本' : '添加母本');
+  const chips = document.getElementById('parentChips');
+  chips.innerHTML = GENE_OPTIONS.map(g =>
+    '<div class="gene-chip-btn" data-abbr="' + g.abbr + '" onclick="breedToggleGene(this)">' +
+      g.label + ' <span class="abbr">' + g.abbr + '</span></div>'
+  ).join('');
+  document.getElementById('parentName').value = '';
+  document.getElementById('parentSex').value = parentListSex;
+  document.getElementById('parentNotes').value = '';
+  // 清空照片状态（不弹 toast）
+  window._parentImgData = null;
+  const prev = document.getElementById('parentPreview');
+  prev.src = ''; prev.className = 'preview empty'; prev.textContent = '📷';
+  document.getElementById('parentImgInfo').textContent = '未选择照片';
+  document.getElementById('parentRemoveBtn').style.display = 'none';
+  if (id) {
+    breedDbGetAll('parents').then(list => {
+      const p = list.find(x => x.id === id);
+      if (p) parentFillForm(p);
+    });
+  }
+  parentSwitchView('ParentForm');
+}
+function parentFillForm(p) {
+  document.getElementById('parentName').value = p.name || '';
+  document.getElementById('parentSex').value = p.sex || 'father';
+  document.getElementById('parentNotes').value = p.notes || '';
+  const sel = p.geneAbbrs || [];
+  document.querySelectorAll('#parentChips .gene-chip-btn').forEach(el => {
+    el.classList.toggle('selected', sel.includes(el.dataset.abbr));
+  });
+  if (p.image) {
+    window._parentImgData = p.image;
+    const prev = document.getElementById('parentPreview');
+    prev.src = p.image; prev.className = 'preview';
+    document.getElementById('parentImgInfo').textContent = p.name || '已选照片';
+    document.getElementById('parentRemoveBtn').style.display = 'inline-block';
+  }
+}
+function parentGetData() {
+  const name = document.getElementById('parentName').value.trim();
+  const sex = document.getElementById('parentSex').value;
+  const chips = document.querySelectorAll('#parentChips .gene-chip-btn.selected');
+  const abbrs = Array.from(chips).map(c => c.dataset.abbr);
+  return {
+    name, sex, geneAbbrs: abbrs, morph: breedGeneLabelFromAbbrs(abbrs),
+    image: window._parentImgData || undefined,
+    notes: document.getElementById('parentNotes').value.trim()
+  };
+}
+function parentNextId(list) {
+  const nums = list.filter(p => /^P\d+$/.test(p.id)).map(p => parseInt(p.id.slice(1), 10));
+  const max = nums.length ? Math.max(...nums) : 0;
+  return 'P' + String(max + 1).padStart(3, '0');
+}
+async function parentSave() {
+  try {
+    const data = parentGetData();
+    if (!data.name) { toast('⚠️ 请填写名字/编号'); return; }
+    const list = await breedDbGetAll('parents');
+    let p;
+    if (parentEditingId) {
+      p = list.find(x => x.id === parentEditingId);
+      if (!p) { toast('⚠️ 记录不存在'); return; }
+      Object.assign(p, data, { updatedAt: new Date().toISOString() });
+    } else {
+      p = { id: parentNextId(list), ...data, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    }
+    await breedDbPut('parents', p);
+    toast('✅ 已保存 ' + p.name);
+    parentEditingId = null;
+    parentShowDetail(p.id);
+  } catch (e) {
+    toast('❌ 保存失败: ' + e.message);
+  }
+}
+async function parentLoadList() {
+  const all = await breedDbGetAll('parents');
+  const filtered = all.filter(p => p.sex === parentListSex);
+  filtered.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  const kw = document.getElementById('parentSearchInput').value.trim().toLowerCase();
+  const shown = kw ? filtered.filter(p =>
+    ((p.name || '') + ' ' + (p.geneAbbrs || []).join(' ') + ' ' + (p.morph || '')).toLowerCase().includes(kw)
+  ) : filtered;
+  const box = document.getElementById('parentList');
+  const empty = document.getElementById('parentEmptyState');
+  if (shown.length === 0) {
+    box.innerHTML = '';
+    if (filtered.length === 0) { empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    box.innerHTML = '<div class="empty-state" style="padding:40px 0"><div class="icon">🔍</div><p>没有匹配的亲本</p></div>';
+    return;
+  }
+  empty.style.display = 'none';
+  box.innerHTML = shown.map(p => parentRenderCard(p)).join('');
+}
+function parentRenderCard(p) {
+  const avatar = p.image ? '<img class="parent-avatar" src="' + p.image + '">' : '<div class="parent-avatar">' + (p.sex === 'father' ? '👨' : '👩') + '</div>';
+  return '<div class="card parent-card" onclick="parentShowDetail(\'' + p.id + '\')">' + avatar +
+    '<div class="parent-info"><div class="parent-name">' + esc(p.name) + '</div>' +
+    (p.morph ? '<div class="parent-morph">' + esc(p.morph) + '</div>' : '') +
+    (p.notes ? '<div class="parent-morph" style="color:var(--text3)">' + esc(p.notes.slice(0, 24)) + (p.notes.length > 24 ? '…' : '') + '</div>' : '') + '</div>' +
+    '<div class="parent-actions" onclick="event.stopPropagation()">' +
+      '<button class="btn btn-sm" onclick="parentShowForm(\'' + p.id + '\')">✏️</button>' +
+      '<button class="btn btn-sm btn-danger" onclick="parentDelete(\'' + p.id + '\')">🗑</button>' +
+    '</div></div>';
+}
+async function parentShowDetail(id) {
+  parentViewingId = id;
+  const all = await breedDbGetAll('parents');
+  const p = all.find(x => x.id === id);
+  if (!p) { toast('⚠️ 记录不存在'); parentShowList(); return; }
+  const clutches = await breedDbGetAll('clutches');
+  const related = clutches.filter(c =>
+    (c.father && (c.father.parentId === p.id || c.father.name === p.name)) ||
+    (c.mother && (c.mother.parentId === p.id || c.mother.name === p.name)));
+  const sexLabel = p.sex === 'father' ? '父本' : '母本';
+  const icon = p.sex === 'father' ? '♂' : '♀';
+  let html = '<div class="detail-card">' +
+    '<div class="detail-head"><div><h2>' + esc(p.name) + ' <span style="font-size:13px;color:var(--text3)">' + icon + ' ' + sexLabel + ' · ' + esc(p.id) + '</span></h2></div>' +
+    '<div style="display:flex;gap:6px;flex-shrink:0">' +
+      '<button class="btn btn-sm" onclick="parentShowForm(\'' + p.id + '\')">✏️</button>' +
+      '<button class="btn btn-sm btn-danger" onclick="parentDelete(\'' + p.id + '\')">🗑</button></div></div>';
+  html += p.image ? '<img class="parent-detail-photo" src="' + p.image + '">' :
+    '<div class="parent-detail-photo" style="display:flex;align-items:center;justify-content:center;font-size:56px;min-height:160px">' + icon + '</div>';
+  html += '<div class="detail-meta">' +
+    '<div class="m-item"><span class="m-label">基因</span><span class="m-val">' + esc(p.morph || '—') + '</span></div>' +
+    '<div class="m-item"><span class="m-label">参与窝次</span><span class="m-val">' + related.length + ' 窝</span></div>' +
+    (p.notes ? '<div class="m-item" style="grid-column:1/-1"><span class="m-label">备注</span><span class="m-val" style="font-weight:400">' + esc(p.notes) + '</span></div>' : '') +
+    '</div></div>';
+  if (related.length > 0) {
+    html += '<div class="detail-card"><div class="breed-sec-title" style="margin-bottom:10px">🥚 参与窝次</div><div class="egg-list">' +
+      related.map(c => {
+        const isF = c.father && (c.father.parentId === p.id || c.father.name === p.name);
+        const other = isF ? c.mother : c.father;
+        return '<div class="egg-card" style="cursor:pointer" onclick="breedShowDetail(\'' + c.id + '\')">' +
+          '<div class="egg-head"><span class="egg-name">' + esc(c.id) + '</span>' +
+          '<span class="status-pill st-incubating">' + (isF ? '♂ 父' : '♀ 母') + '</span></div>' +
+          '<div style="font-size:12px;color:var(--text2)">下蛋 ' + esc(c.laidDate || '—') + ' · 配对 ' + esc(other ? other.name : '—') + '</div></div>';
+      }).join('') + '</div></div>';
+  }
+  html += '<div style="text-align:center;margin:6px 0 20px"><button class="btn" onclick="parentShowList()">← 返回列表</button></div>';
+  document.getElementById('pageParentDetail').innerHTML = html;
+  parentSwitchView('ParentDetail');
+}
+function parentDelete(id) {
+  if (!confirm('确定删除亲本 ' + id + ' 吗？')) return;
+  breedDbDelete('parents', id).then(() => { toast('已删除'); parentShowList(); });
+}
+
+// 档案表单：从亲本库选择（role: 'dad' | 'mom'）→ 打开共享弹窗
+function parentPickForGecko(role) {
+  const sex = role === 'dad' ? 'father' : 'mother';
+  window._geckoPickRole = role;
+  document.getElementById('breedPickerModal').classList.add('show');
+  document.getElementById('breedPickerSearch').value = '';
+  breedDbGetAll('parents').then(list => {
+    breedGeckoCache = list.filter(p => p.sex === sex);
+    breedRenderPickerList();
+  });
+}
+
+// 档案表单基因下拉直接填充（含确认态 + 标签刷新）
+function setGeneSelectorAbbrs(selId, abbrs) {
+  const chipsId = selId.replace('Selector', 'Chips');
+  const labelId = selId.replace('Selector', 'Label');
+  const chips = document.querySelectorAll('#' + chipsId + ' .gene-chip-btn');
+  chips.forEach(c => c.classList.toggle('selected', abbrs.includes(c.dataset.abbr)));
+  document.getElementById(selId).dataset.confirmed = JSON.stringify(abbrs);
+  updateParentGeneLabel(labelId, chipsId);
+}
+
 // ====== Init ======
+// 全局错误捕获：任何 JS 错误都弹提示，避免"点了没反应"
+window.addEventListener('error', function(e) {
+  toast('⚠️ 页面错误: ' + (e.message || '未知错误'));
+});
+window.addEventListener('unhandledrejection', function(e) {
+  const msg = e.reason && e.reason.message ? e.reason.message : '数据库不可用或操作失败';
+  toast('⚠️ ' + msg);
+});
+// 基因选择器 UI 不依赖数据库，先行初始化（DB 初始化失败时表单仍完整可用）
+initGeneCheckboxes();
 openDB().then(() => {
-  initGeneCheckboxes();
   renderList();
 
   const params = new URLSearchParams(window.location.search);
