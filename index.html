@@ -1114,6 +1114,11 @@ function showPage(name) {
 }
 
 function switchTab(name) {
+  if (name === 'list') {
+    showPage('list');
+    renderList(); // 切到列表时刷新（自动建档的新睫角才会出现）
+    return;
+  }
   if (name === 'parents') {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('pageParents').classList.add('active');
@@ -2201,6 +2206,7 @@ async function breedShowDetail(id) {
           (bad ? '<span class="status-pill st-bad">损坏 ' + bad + '</span>' : '') +
         '</div></div>' +
         '<div style="display:flex;gap:6px;flex-shrink:0">' +
+          '<button class="btn btn-sm" onclick="showClutchQR(\'' + c.id + '\')" title="窝次二维码">🔗</button>' +
           '<button class="btn btn-sm" onclick="breedShowForm(\'' + c.id + '\')">✏️</button>' +
           '<button class="btn btn-sm btn-danger" onclick="breedDeleteClutch(\'' + c.id + '\')">🗑</button>' +
         '</div>' +
@@ -2247,7 +2253,6 @@ function breedRenderEgg(e, clutchId, idx) {
             : '<button class="btn btn-sm" onclick="breedOpenHatch(\'' + clutchId + '\',\'' + e.id + '\')">🐊 出壳</button>') +
           '<button class="btn btn-sm" onclick="breedMarkEgg(\'' + clutchId + '\',\'' + e.id + '\',\'bad\')" ' +
             (e.status === 'bad' || e.status === 'collapsed' ? 'style="opacity:.4"' : '') + '>💀 坏蛋</button>' +
-          '<button class="btn btn-sm" onclick="showEggQR(\'' + clutchId + '\',' + (idx + 1) + ')" title="蛋二维码">🔗</button>' +
           '<button class="btn btn-sm" onclick="breedRemoveEgg(\'' + clutchId + '\',\'' + e.id + '\')">🗑</button>' +
         '</div>' +
       '</div>' +
@@ -2547,36 +2552,53 @@ async function breedSaveHatched() {
     breedCloseHatch();
     toast('✅ 已建档 ' + gecko.id);
     breedShowDetail(clutchId);
+    showGeckoQR(gecko.id); // 出壳后自动生成睫角专属二维码
   } catch (err) {
     toast('❌ 建档失败: ' + err.message);
   }
 }
 
-// ====== 蛋专属二维码 ======
-let breedQRState = null; // { url, info }
-function showEggQR(clutchId, eggIdx) {
+// ====== 二维码弹窗（窝次共用 + 出壳后睫角） ======
+let breedQRState = null; // { url }
+function openQRModal(url, infoHtml) {
+  breedQRState = { url };
+  document.getElementById('eggQRInfo').innerHTML = infoHtml;
+  const box = document.getElementById('eggQrcode');
+  box.innerHTML = '';
+  new QRCode(box, {
+    text: url,
+    width: 180, height: 180,
+    colorDark: '#0a0a0f',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+  document.getElementById('breedQRModal').classList.add('show');
+}
+// 窝次二维码：一次交配/一窝只生成一个（含 2 颗蛋）
+function showClutchQR(clutchId) {
   breedDbGetAll('clutches').then(list => {
     const c = list.find(x => x.id === clutchId);
     if (!c) return;
-    const e = (c.eggs || [])[eggIdx - 1];
-    if (!e) return;
     const f = c.father || {}, m = c.mother || {};
+    const eggs = c.eggs || [];
+    const hatched = eggs.filter(e => e.status === 'hatched').length;
     const base = window.location.href.split('#')[0].split('?')[0];
-    const url = base + '?clutch=' + clutchId + '&egg=' + eggIdx;
-    breedQRState = { url };
-    const info = '蛋 ' + eggIdx + ' · ' + e.id + '\n下蛋 ' + (c.laidDate || '—') + ' · ' +
-      (c.temp ? c.temp + '℃' : '') + '\n♂ ' + (f.name || '—') + ' × ♀ ' + (m.name || '—');
-    document.getElementById('eggQRInfo').innerHTML = info.replace(/\n/g, '<br>');
-    const box = document.getElementById('eggQrcode');
-    box.innerHTML = '';
-    new QRCode(box, {
-      text: url,
-      width: 180, height: 180,
-      colorDark: '#0a0a0f',
-      colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.H
-    });
-    document.getElementById('breedQRModal').classList.add('show');
+    openQRModal(base + '?clutch=' + clutchId,
+      '窝次 ' + esc(c.id) + ' · ' + eggs.length + ' 枚蛋' +
+      (hatched ? '（已出壳 ' + hatched + '）' : '') + '<br>下蛋 ' + esc(c.laidDate || '—') +
+      (c.temp ? ' · ' + esc(c.temp) + '℃' : '') +
+      '<br>♂ ' + esc(f.name || '—') + ' × ♀ ' + esc(m.name || '—'));
+  });
+}
+// 睫角二维码：出壳建档后自动生成
+function showGeckoQR(geckoId) {
+  breedDbGetAll('geckos').then(list => {
+    const g = list.find(x => x.id === geckoId);
+    if (!g) return;
+    const base = window.location.href.split('#')[0].split('?')[0];
+    openQRModal(base + '?gecko=' + geckoId,
+      '睫角 ' + esc(g.id) + '<br>' + esc(g.gene || '') +
+      '<br>♂ ' + esc((g.father && g.father.name) || '—') + ' × ♀ ' + esc((g.mother && g.mother.name) || '—'));
   });
 }
 function breedCloseQR() { document.getElementById('breedQRModal').classList.remove('show'); }
