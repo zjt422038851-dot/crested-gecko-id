@@ -2695,12 +2695,13 @@ function openQRModal(url, infoHtml) {
   document.getElementById('eggQRInfo').innerHTML = infoHtml;
   const box = document.getElementById('eggQrcode');
   box.innerHTML = '';
+  // 320px：二维码足够大，手机摄像头易识别（180px + 高密度内容扫码会失败）
   new QRCode(box, {
     text: url,
-    width: 180, height: 180,
+    width: 320, height: 320,
     colorDark: '#0a0a0f',
     colorLight: '#ffffff',
-    correctLevel: QRCode.CorrectLevel.H
+    correctLevel: QRCode.CorrectLevel.M
   });
   document.getElementById('breedQRModal').classList.add('show');
 }
@@ -2977,7 +2978,18 @@ function setGeneSelectorAbbrs(selId, abbrs) {
 // Service Worker 注册（network-first 保证更新即时生效；旧缓存会被 activate 清理）
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      // 主动检查更新：部署后手机尽快拿到新版（不再等 24h）
+      reg.update().catch(() => {});
+      // 新版 SW 接管时自动刷新一次，确保用户运行最新代码
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        refreshing = true;
+        toast('🔄 检测到新版本，正在刷新…');
+        setTimeout(() => window.location.reload(), 600);
+      });
+    }).catch(() => {});
   });
 }
 // 全局错误捕获：任何 JS 错误都弹提示，避免"点了没反应"
