@@ -2715,20 +2715,9 @@ function showClutchQR(clutchId) {
     const eggs = c.eggs || [];
     const hatched = eggs.filter(e => e.status === 'hatched').length;
     const base = window.location.href.split('#')[0].split('?')[0];
-    let d = '';
-    try {
-      // 极简结构：控制二维码长度（长度越短 QR 版本越低、越易扫）
-      const compact = {
-        i: c.id,
-        l: c.laidDate || '',
-        t: c.temp || '',
-        f: f.name || '', fm: f.morph || '',
-        m: m.name || '', mm: m.morph || '',
-        e: eggs.map(e => e.status || 'i')
-      };
-      d = '&d=' + LZString.compressToEncodedURIComponent(JSON.stringify(compact));
-    } catch (e) { d = ''; }
-    openQRModal(base + '?clutch=' + clutchId + d,
+    // 短 URL（不内嵌数据）：与睫角二维码同级密度(40字符级)，扫码工具必能识别。
+    // 同设备扫码 → 本地数据直达；跨设备用「复制链接」发送（长数据链接有截断风险）。
+    openQRModal(base + '?clutch=' + clutchId,
       '窝次 ' + esc(c.id) + ' · ' + eggs.length + ' 枚蛋' +
       (hatched ? '（已出壳 ' + hatched + '）' : '') + '<br>下蛋 ' + esc(c.laidDate || '—') +
       (c.temp ? ' · ' + esc(c.temp) + '℃' : '') +
