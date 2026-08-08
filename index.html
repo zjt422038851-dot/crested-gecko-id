@@ -59,7 +59,7 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 .app-header {
   position: sticky; top: 0; z-index: 100;
   background: rgba(255,255,255,0.92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-  padding: 10px 16px;
+  padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
   display: flex; align-items: center; justify-content: space-between;
   border-bottom: 1px solid var(--border);
 }
@@ -1925,10 +1925,28 @@ function saveQRImage(id, name) {
   ctx.textAlign = 'center';
   ctx.fillText(name, totalW / 2, totalH - 14);
 
-  const link = document.createElement('a');
-  link.download = name + '_\u4E8C\u7EF4\u7801.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
+  const dataUrl = canvas.toDataURL('image/png');
+  if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+    // 原生 App（APK）：写入缓存目录并调起系统分享（可存相册/发送）
+    try {
+      window.Capacitor.Plugins.Filesystem.writeFile({
+        path: 'qr-' + Date.now() + '.png',
+        data: dataUrl.split(',')[1],
+        directory: 'CACHE'
+      }).then(res => {
+        window.Capacitor.Plugins.Share.share({
+          title: name + ' 的二维码',
+          text: name + ' 的睫角二维码',
+          files: [res.uri]
+        });
+      });
+    } catch (e) { toast('保存失败: ' + e.message); }
+  } else {
+    const link = document.createElement('a');
+    link.download = name + '_二维码.png';
+    link.href = dataUrl;
+    link.click();
+  }
   toast('\u2705 \u4E8C\u7EF4\u7801\u5DF2\u4FDD\u5B58');
 }
 
@@ -2784,10 +2802,28 @@ function saveEggQRImage() {
   ctx.drawImage(qrEl, padding, padding, qrSize, qrSize);
   ctx.fillStyle = '#101828'; ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center';
   ctx.fillText(breedQRState && breedQRState.url ? decodeURIComponent(breedQRState.url.split('?')[1] || '') : '', canvas.width / 2, canvas.height - 14);
-  const a = document.createElement('a');
-  a.download = 'egg-qr-' + Date.now() + '.png';
-  a.href = canvas.toDataURL('image/png');
-  a.click();
+  const dataUrl = canvas.toDataURL('image/png');
+  if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+    // 原生 App（APK）：写入缓存目录并调起系统分享（可存相册/发送）
+    try {
+      window.Capacitor.Plugins.Filesystem.writeFile({
+        path: 'qr-' + Date.now() + '.png',
+        data: dataUrl.split(',')[1],
+        directory: 'CACHE'
+      }).then(res => {
+        window.Capacitor.Plugins.Share.share({
+          title: '窝次二维码',
+          text: breedQRState ? breedQRState.url : '窝次二维码',
+          files: [res.uri]
+        });
+      });
+    } catch (e) { toast('保存失败: ' + e.message); }
+  } else {
+    const a = document.createElement('a');
+    a.download = 'egg-qr-' + Date.now() + '.png';
+    a.href = dataUrl;
+    a.click();
+  }
   toast('📥 二维码图片已保存');
 }
 
