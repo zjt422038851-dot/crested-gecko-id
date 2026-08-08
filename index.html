@@ -1979,9 +1979,17 @@ function startScanner() {
 function onScanSuccess(decodedText) {
   stopScanner();
   let geckoId = null;
+  let isAppUrl = false;
   try {
     const url = new URL(decodedText);
     geckoId = url.searchParams.get('gecko');
+    // 窝次二维码（含 clutch 参数）→ 直接跳转繁殖详情
+    if (url.searchParams.get('clutch')) {
+      toast('✅ 已识别窝次二维码');
+      applyDirectParams(url.search);
+      return;
+    }
+    isAppUrl = url.search.length > 0;
   } catch {
     if (decodedText.startsWith('g')) geckoId = decodedText;
   }
@@ -1999,7 +2007,7 @@ function onScanSuccess(decodedText) {
     });
   } else {
     document.getElementById('scannerResult').innerHTML =
-      '<div style="color:#ff6060;">\u26A0\uFE0F \u65E0\u6548\u4E8C\u7EF4\u7801\uFF0C\u672A\u5305\u542B\u776B\u89D2\u4FE1\u606F</div>' +
+      '<div style="color:#ff6060;">\u26A0\uFE0F \u65E0\u6548\u4E8C\u7EF4\u7801\uFF0C\u672A\u5305\u542B\u776B\u89D2\u6216\u7A9D\u6B21\u4FE1\u606F</div>' +
       '<button class="btn btn-outline" onclick="startScanner()" style="margin-top:8px;padding:8px 20px;width:auto;display:inline-block;">\u91CD\u65B0\u626B\u7801</button>';
   }
 }
@@ -3002,13 +3010,14 @@ openDB().then(() => {
 
 // ====== URL 参数直达（扫码/链接打开立即跳转，独立于所有初始化）======
 // 不依赖 openDB/switchTab 是否成功；本地数据慢时自动重试；找不到时明确提示
-(function() {
+// 返回 true 表示已处理（供扫码页复用）
+function applyDirectParams(search) {
   try {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(search || '');
     const gecko = params.get('gecko');
     const clutch = params.get('clutch');
     const hasTarget = gecko || clutch;
-    if (!hasTarget) return;
+    if (!hasTarget) return false;
     // 直接切换视图：繁殖 Tab（窝次详情在繁殖模块内）
     function activateView() {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -3038,7 +3047,7 @@ openDB().then(() => {
               eggs: (c.e || []).map((s, idx) => ({ id: c.i + '-' + (idx + 1), status: s }))
             };
             setTimeout(() => breedRenderDetail(norm), 150);
-            return;
+            return true;
           }
         } catch (e) { /* 数据损坏 → 本地查询 */ }
       }
@@ -3056,7 +3065,7 @@ openDB().then(() => {
         });
       }
       setTimeout(tryLocal, 150);
-      return;
+      return true;
     }
     if (gecko) {
       let tries = 0;
@@ -3070,9 +3079,12 @@ openDB().then(() => {
         });
       }
       setTimeout(tryGecko, 150);
+      return true;
     }
   } catch (e) { /* 参数直达失败不阻塞页面 */ }
-})();
+  return false;
+}
+(function() { try { applyDirectParams(window.location.search); } catch (e) {} })();
 </script>
 </body>
 </html>
