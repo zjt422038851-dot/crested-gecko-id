@@ -429,7 +429,7 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 .modal-box {
   background: var(--bg); border: 1px solid var(--border);
   border-radius: var(--radius-card); padding: 24px; max-width: 320px; width: 100%;
-  text-align: center;
+  text-align: center; max-height: 85vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
 }
 .modal-box h3 { font-size: 17px; font-weight: 500; margin-bottom: 8px; }
 .modal-box p { font-size: 14px; color: var(--text3); line-height: 1.6; margin-bottom: 16px; }
@@ -527,8 +527,8 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 .form-actions .btn { flex: 1; }
 .est-date-display { padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text3); font-size: 13px; min-height: 42px; display: flex; align-items: center; }
 .est-date-ready { color: var(--accent-link); font-weight: 600; background: rgba(18,183,106,0.06); }
-.detail-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-.detail-head h2 { font-size: 18px; margin-bottom: 4px; }
+.detail-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 8px; }
+.detail-head h2 { font-size: 18px; margin-bottom: 4px; word-break: break-all; }
 .detail-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; font-size: 13px; margin-bottom: 12px; }
 .detail-meta .m-item { display: flex; justify-content: space-between; gap: 8px; padding: 6px 10px; background: var(--surface); border-radius: var(--radius); }
 .detail-meta .m-label { color: var(--text3); }
@@ -545,7 +545,7 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 .egg-badge { display: inline-block; width: 22px; height: 22px; line-height: 22px; text-align: center; border-radius: 50%; background: var(--surface); font-size: 12px; font-weight: 700; }
 .breed-modal-overlay { position: fixed; inset: 0; z-index: 300; background: rgba(16,24,40,0.5); display: none; align-items: flex-end; justify-content: center; }
 .breed-modal-overlay.show { display: flex; }
-.breed-modal { background: var(--bg-deep); width: 100%; max-width: 720px; max-height: 80vh; border-radius: 16px 16px 0 0; padding: 16px; display: flex; flex-direction: column; animation: slideUp .2s ease; }
+.breed-modal { background: var(--bg-deep); width: 100%; max-width: 720px; max-height: 90vh; border-radius: 16px 16px 0 0; padding: 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; overflow-y: auto; -webkit-overflow-scrolling: touch; animation: slideUp .2s ease; }
 @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
 .breed-modal h3 { font-size: 15px; margin-bottom: 12px; }
 .breed-modal input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; font-family: inherit; outline: none; margin-bottom: 10px; }
@@ -585,6 +585,11 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 .egg-baby-link { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--accent-link); font-weight: 600; cursor: pointer; margin-left: 6px; }
 .egg-qr-btn { font-size: 12px; color: var(--text2); cursor: pointer; margin-left: 8px; }
 
+/* ====== 小屏适配（≤400px，窄屏手机表单单列不溢出）====== */
+@media (max-width: 400px) {
+  .form-row { grid-template-columns: 1fr; }
+  .hatch-parents { flex-direction: column; }
+}
 </style>
 </head>
 <body>
