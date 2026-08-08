@@ -2070,13 +2070,12 @@ function importData(event) {
   event.target.value = '';
 }
 
-// 清空全部数据：geckos（睫角）+ clutches（窝次）+ parents（亲本），兼容双存储模式
+// 清空全部数据：geckos（睫角）+ clutches（窝次）+ parents（亲本）
+// 必须两个源都清（双写机制下 idb 和 localStorage 都可能有数据）——否则残留数据会被 migrateLsToIdb 迁回"复原"
 function clearAllData() {
   const stores = ['geckos', 'clutches', 'parents'];
-  if (storageMode === 'ls' || !db) {
-    stores.forEach(lsClear);
-    return Promise.resolve();
-  }
+  stores.forEach(lsClear); // localStorage 无条件清
+  if (storageMode === 'ls' || !db) return Promise.resolve();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(stores, 'readwrite');
     stores.forEach(s => tx.objectStore(s).clear());
