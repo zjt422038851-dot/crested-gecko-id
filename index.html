@@ -2082,17 +2082,31 @@ function stopScanner() {
 
 // ====== Data Import/Export ======
 function exportData() {
-  dbGetAll().then(all => {
-    if (all.length === 0) { toast('\u6682\u65E0\u6570\u636E\u53EF\u5BFC\u51FA'); return; }
+  Promise.all([dbGetAll(), breedDbGetAll('clutches'), breedDbGetAll('parents')]).then(([geckos, clutches, parents]) => {
+    if (geckos.length === 0 && clutches.length === 0 && parents.length === 0) { toast('暂无可导出的数据'); return; }
+    const all = { geckos: geckos, clutches: clutches, parents: parents, exportedAt: new Date().toISOString() };
     const data = JSON.stringify(all, null, 2);
+    const filename = '睫角数据_' + new Date().toISOString().slice(0, 10) + '.json';
+    // 优先 File System Access API：让用户选择保存位置（Chrome/Edge/Android Chrome，https 环境）
+    if (window.showSaveFilePicker) {
+      window.showSaveFilePicker({
+        suggestedName: filename,
+        types: [{ description: 'JSON 备份', accept: { 'application/json': ['.json'] } }]
+      }).then(handle => {
+        return handle.createWritable().then(w => w.write(data).then(() => w.close()));
+      }).then(() => toast('✅ 备份已保存到所选位置'))
+        .catch(err => { if (err.name !== 'AbortError') toast('⚠️ 保存失败: ' + err.message); });
+      return;
+    }
+    // 回退：浏览器默认下载位置
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = '\u776B\u89D2\u6570\u636E_' + new Date().toISOString().slice(0,10) + '.json';
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    toast('\u2705 \u5BFC\u51FA\u6210\u529F');
+    toast('✅ 导出成功');
   });
 }
 
@@ -2103,15 +2117,31 @@ function importData(event) {
   reader.onload = e => {
     try {
       const data = JSON.parse(e.target.result);
-      if (!Array.isArray(data)) throw new Error('\u683C\u5F0F\u9519\u8BEF');
-      let count = 0;
-      Promise.all(data.map(g => dbPut(g).then(() => count++)))
+      // 兼容两种格式：新格式 {geckos, clutches, parents} / 旧格式 [睫角数组]
+      let geckos = [], clutches = [], parents = [];
+      if (Array.isArray(data)) {
+        geckos = data;
+      } else if (data && typeof data === 'object') {
+        geckos = data.geckos || [];
+        clutches = data.clutches || [];
+        parents = data.parents || [];
+      } else {
+        throw new Error('格式错误');
+      }
+      const tasks = [];
+      geckos.forEach(g => tasks.push(dbPut(g)));
+      clutches.forEach(c => tasks.push(breedDbPut('clutches', c)));
+      parents.forEach(p => tasks.push(breedDbPut('parents', p)));
+      Promise.all(tasks)
         .then(() => {
-          toast('\u2705 \u5BFC\u5165\u6210\u529F\uFF01\u5171 ' + count + ' \u6761');
+          toast('✅ 导入成功！睫角 ' + geckos.length + ' · 窝次 ' + clutches.length + ' · 亲本 ' + parents.length);
           renderList();
-        });
+          breedLoadList();
+          if (typeof parentLoadList === 'function') parentLoadList();
+        })
+        .catch(err => toast('❌ 导入失败: ' + err.message));
     } catch(err) {
-      toast('\u274C \u5BFC\u5165\u5931\u8D25: ' + err.message);
+      toast('❌ 导入失败: ' + err.message);
     }
   };
   reader.readAsText(file);
