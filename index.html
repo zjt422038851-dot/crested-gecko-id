@@ -2070,11 +2070,27 @@ function importData(event) {
   event.target.value = '';
 }
 
+// 清空全部数据：geckos（睫角）+ clutches（窝次）+ parents（亲本），兼容双存储模式
+function clearAllData() {
+  const stores = ['geckos', 'clutches', 'parents'];
+  if (storageMode === 'ls' || !db) {
+    stores.forEach(lsClear);
+    return Promise.resolve();
+  }
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(stores, 'readwrite');
+    stores.forEach(s => tx.objectStore(s).clear());
+    tx.oncomplete = () => resolve();
+    tx.onerror = e => reject(e.target.error);
+  });
+}
+
 function confirmClear() {
-  showModal('\u26A0\uFE0F \u6E05\u9664\u5168\u90E8\u6570\u636E', '\u6B64\u64CD\u4F5C\u4E0D\u53EF\u6062\u590D\uFF01\u5C06\u5220\u9664\u6240\u6709\u776B\u89D2\u4FE1\u606F\u3002\u786E\u5B9A\u7EE7\u7EED\uFF1F', () => {
-    dbClear().then(() => {
-      toast('\u5DF2\u6E05\u9664\u5168\u90E8\u6570\u636E');
+  showModal('\u26A0\uFE0F \u6E05\u9664\u5168\u90E8\u6570\u636E', '\u6B64\u64CD\u4F5C\u4E0D\u53EF\u6062\u590D\uFF01\u5C06\u5220\u9664\u6240\u6709\u776B\u89D2\u3001\u7A9D\u6B21\u4E0E\u4EB2\u672C\u4FE1\u606F\u3002\u786E\u5B9A\u7EE7\u7EED\uFF1F', () => {
+    clearAllData().then(() => {
+      toast('已清除全部数据');
       renderList();
+      breedLoadList();
     });
   });
 }
