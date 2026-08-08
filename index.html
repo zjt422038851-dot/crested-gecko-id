@@ -3006,42 +3006,84 @@ window.addEventListener('unhandledrejection', function(e) {
 initGeneCheckboxes();
 openDB().then(() => {
   renderList();
-
-  const params = new URLSearchParams(window.location.search);
-  const geckoId = params.get('gecko');
-  if (geckoId) {
-    dbGet(geckoId).then(g => {
-      if (g) showDetail(geckoId);
-    });
-  }
-  const clutchParam = params.get('clutch');
-  if (clutchParam) {
-    // 窝次二维码：直达该窝次详情
-    switchTab('breed');
-    const clutchData = params.get('d');
-    if (clutchData) {
-      // 数据自包含模式：二维码内置压缩数据，任何设备（无本地数据）都能显示详情
-      try {
-        const c = JSON.parse(LZString.decompressFromEncodedURIComponent(clutchData));
-        if (c && c.i) {
-          // 极简结构 → 标准结构（i/l/t/f/fm/m/mm/e）
-          const norm = {
-            id: c.i, laidDate: c.l, temp: c.t,
-            father: c.f ? { name: c.f, morph: c.fm || '', geneAbbrs: [] } : null,
-            mother: c.m ? { name: c.m, morph: c.mm || '', geneAbbrs: [] } : null,
-            eggs: (c.e || []).map((s, idx) => ({ id: c.i + '-' + (idx + 1), status: s }))
-          };
-          setTimeout(() => breedRenderDetail(norm), 400);
-          return;
-        }
-      } catch (e) { /* 数据损坏则走本地查询 */ }
-    }
-    setTimeout(() => breedShowDetail(clutchParam), 400);
-  }
 }).catch(e => {
   document.getElementById('listContent').innerHTML =
     '<div class="empty-state" style="color:#ff6060;"><div class="icon">\u26A0\uFE0F</div><p>\u6570\u636E\u5E93\u521D\u59CB\u5316\u5931\u8D25: ' + e.message + '</p></div>';
 });
+
+// ====== URL 参数直达（扫码/链接打开立即跳转，独立于所有初始化）======
+// 不依赖 openDB/switchTab 是否成功；本地数据慢时自动重试；找不到时明确提示
+(function() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const gecko = params.get('gecko');
+    const clutch = params.get('clutch');
+    const hasTarget = gecko || clutch;
+    if (!hasTarget) return;
+    // 直接切换视图：繁殖 Tab（窝次详情在繁殖模块内）
+    function activateView() {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+      const breedTab = document.querySelector('.tab-btn[data-page="breed"]');
+      if (breedTab) breedTab.classList.add('active');
+      document.getElementById('pageBreedList').classList.add('active');
+    }
+    function showNotFound(id) {
+      document.getElementById('pageBreedDetail').innerHTML =
+        '<div class="empty-state" style="padding:60px 20px"><div class="icon">🥚</div>' +
+        '<p>未找到窝次 <strong>' + esc(id) + '</strong><br>' +
+        '<span style="font-size:13px;color:var(--text3)">该数据可能不在当前浏览器/设备（扫码工具的内置浏览器与常用浏览器数据不互通）</span></p></div>';
+      document.getElementById('pageBreedDetail').classList.add('active');
+    }
+    if (clutch) {
+      activateView();
+      const d = params.get('d');
+      if (d) {
+        try {
+          const c = JSON.parse(LZString.decompressFromEncodedURIComponent(d));
+          if (c && c.i) {
+            const norm = {
+              id: c.i, laidDate: c.l, temp: c.t,
+              father: c.f ? { name: c.f, morph: c.fm || '', geneAbbrs: [] } : null,
+              mother: c.m ? { name: c.m, morph: c.mm || '', geneAbbrs: [] } : null,
+              eggs: (c.e || []).map((s, idx) => ({ id: c.i + '-' + (idx + 1), status: s }))
+            };
+            setTimeout(() => breedRenderDetail(norm), 150);
+            return;
+          }
+        } catch (e) { /* 数据损坏 → 本地查询 */ }
+      }
+      // 本地查询（含重试，等数据/DB 就绪）
+      let tries = 0;
+      function tryLocal() {
+        breedDbGetAll('clutches').then(list => {
+          const c = list.find(x => x.id === clutch);
+          if (c) { breedRenderDetail(c); }
+          else if (tries < 6) { tries++; setTimeout(tryLocal, 400); }
+          else { showNotFound(clutch); }
+        }).catch(() => {
+          if (tries < 6) { tries++; setTimeout(tryLocal, 400); }
+          else { showNotFound(clutch); }
+        });
+      }
+      setTimeout(tryLocal, 150);
+      return;
+    }
+    if (gecko) {
+      let tries = 0;
+      function tryGecko() {
+        dbGet(gecko).then(g => {
+          if (g) showDetail(gecko);
+          else if (tries < 6) { tries++; setTimeout(tryGecko, 400); }
+          else { showDetail(gecko); }
+        }).catch(() => {
+          if (tries < 6) { tries++; setTimeout(tryGecko, 400); }
+        });
+      }
+      setTimeout(tryGecko, 150);
+    }
+  } catch (e) { /* 参数直达失败不阻塞页面 */ }
+})();
 </script>
 </body>
 </html>
