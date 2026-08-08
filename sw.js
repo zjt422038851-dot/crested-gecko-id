@@ -2,6 +2,9 @@ const CACHE = 'crested-gecko-v2';
 const URLS = [
   'index.html',
   'manifest.json',
+  'icon-192.png',
+  'icon-512.png',
+  'icon-180.png',
   'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js',
   'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js'
 ];
