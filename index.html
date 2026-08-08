@@ -2717,12 +2717,14 @@ function showClutchQR(clutchId) {
     const base = window.location.href.split('#')[0].split('?')[0];
     let d = '';
     try {
+      // 极简结构：控制二维码长度（长度越短 QR 版本越低、越易扫）
       const compact = {
-        id: c.id,
-        laidDate: c.laidDate || '', temp: c.temp || '',
-        f: f.name ? { n: f.name, m: f.morph || '', a: f.geneAbbrs || [] } : null,
-        mo: m.name ? { n: m.name, m: m.morph || '', a: m.geneAbbrs || [] } : null,
-        eggs: eggs.map(e => ({ id: e.id, s: e.status || '', h: e.hatchDate || '', b: e.babyId || '' }))
+        i: c.id,
+        l: c.laidDate || '',
+        t: c.temp || '',
+        f: f.name || '', fm: f.morph || '',
+        m: m.name || '', mm: m.morph || '',
+        e: eggs.map(e => e.status || 'i')
       };
       d = '&d=' + LZString.compressToEncodedURIComponent(JSON.stringify(compact));
     } catch (e) { d = ''; }
@@ -3021,13 +3023,13 @@ openDB().then(() => {
       // 数据自包含模式：二维码内置压缩数据，任何设备（无本地数据）都能显示详情
       try {
         const c = JSON.parse(LZString.decompressFromEncodedURIComponent(clutchData));
-        if (c && c.id) {
-          // compact 结构 → 标准结构（f:{n,m,a} → father:{name,morph,geneAbbrs}）
+        if (c && c.i) {
+          // 极简结构 → 标准结构（i/l/t/f/fm/m/mm/e）
           const norm = {
-            id: c.id, laidDate: c.laidDate, temp: c.temp,
-            father: c.f ? { name: c.f.n, morph: c.f.m, geneAbbrs: c.f.a } : null,
-            mother: c.mo ? { name: c.mo.n, morph: c.mo.m, geneAbbrs: c.mo.a } : null,
-            eggs: c.eggs || []
+            id: c.i, laidDate: c.l, temp: c.t,
+            father: c.f ? { name: c.f, morph: c.fm || '', geneAbbrs: [] } : null,
+            mother: c.m ? { name: c.m, morph: c.mm || '', geneAbbrs: [] } : null,
+            eggs: (c.e || []).map((s, idx) => ({ id: c.i + '-' + (idx + 1), status: s }))
           };
           setTimeout(() => breedRenderDetail(norm), 400);
           return;
