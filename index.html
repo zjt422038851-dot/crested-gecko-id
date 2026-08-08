@@ -582,6 +582,7 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 .hatch-parent-box .hp-sex { font-size: 11px; color: var(--text3); }
 .hatch-parent-box .hp-name { font-weight: 600; margin-top: 1px; }
 .hatch-parent-box .hp-morph { font-size: 11px; color: var(--text2); margin-top: 1px; }
+.hp-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: var(--bg-deep); flex-shrink: 0; }
 .egg-baby-link { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--accent-link); font-weight: 600; cursor: pointer; margin-left: 6px; }
 .egg-qr-btn { font-size: 12px; color: var(--text2); cursor: pointer; margin-left: 8px; }
 
@@ -998,13 +999,14 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 <!-- ====== 蛋专属二维码弹窗 ====== -->
 <div class="breed-modal-overlay" id="breedQRModal" onclick="if(event.target===this)breedCloseQR()">
   <div class="breed-modal" style="align-items:center;text-align:center">
-    <h3 style="width:100%;text-align:left">🔗 蛋专属二维码</h3>
+    <h3 style="width:100%;text-align:left">🔗 窝次二维码</h3>
     <div id="eggQrcode" style="background:#fff;padding:12px;border-radius:8px;margin:8px 0"></div>
     <div id="eggQRInfo" style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px"></div>
     <div class="form-actions">
-      <button class="btn" onclick="saveEggQRImage()">📥 保存图片</button>
+      <button class="btn" onclick="saveEggQRImage()">📥 保存到相册</button>
       <button class="btn btn-primary" onclick="shareEggQR()">📤 复制链接</button>
     </div>
+    <div class="qr-tip">💡 长按二维码图片可直接保存到相册</div>
   </div>
 </div>
 
@@ -1872,13 +1874,23 @@ function showDetail(id) {
       const c = document.getElementById('qrcode');
       c.innerHTML = '';
       const url = window.location.href.split('#')[0].split('?')[0] + '?gecko=' + g.id;
-      new QRCode(c, {
+      const qr = new QRCode(c, {
         text: url,
         width: 160, height: 160,
         colorDark: '#0a0a0f',
         colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.H
       });
+      // 转成 <img>：长按图片 = 系统原生「保存到相册」
+      const cv = c.querySelector('canvas');
+      if (cv) {
+        const img = document.createElement('img');
+        img.src = cv.toDataURL('image/png');
+        img.alt = '二维码';
+        img.style.cssText = 'width:160px;height:160px;display:block;';
+        c.innerHTML = '';
+        c.appendChild(img);
+      }
     }, 100);
   });
 }
@@ -1942,6 +1954,18 @@ function saveQRImage(id, name) {
       });
     } catch (e) { toast('保存失败: ' + e.message); }
   } else {
+    // 网页版：优先系统分享（Android 分享面板可直接「保存到相册」）
+    try {
+      const bin = atob(dataUrl.split(',')[1]);
+      const arr = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+      const file = new File([arr], name + '_二维码.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: name + ' 的二维码' }).catch(() => {});
+        toast('✅ 二维码已保存');
+        return;
+      }
+    } catch (e) { /* 不支持 → 下载回退 */ }
     const link = document.createElement('a');
     link.download = name + '_二维码.png';
     link.href = dataUrl;
@@ -2149,6 +2173,9 @@ function breedDbGetAll(store) {
     req.onsuccess = () => resolve(req.result);
     req.onerror = e => reject(e.target.error);
   });
+}
+function breedDbGet(store, id) {
+  return breedDbGetAll(store).then(list => list.find(x => x.id === id) || null);
 }
 function breedDbPut(store, obj) {
   lsPut(store, obj); // 双写：localStorage 始终同步（降级/恢复兜底）
@@ -2389,8 +2416,25 @@ function breedRenderDetail(c) {
         '<div class="m-item"><span class="m-label">孵化天数</span><span class="m-val">' + (days === null ? '—' : days + ' 天') + '</span></div>' +
         (c.temp ? '<div class="m-item"><span class="m-label">温度</span><span class="m-val">' + esc(c.temp) + ' ℃</span></div>' : '') +
         (est ? '<div class="m-item"><span class="m-label">预计出壳</span><span class="m-val">' + est + '</span></div>' : '') +
-        (f.name || m.name ? '<div class="m-item" style="grid-column:1/-1"><span class="m-label">亲本</span><span class="m-val">♂ ' + esc(f.name || '—') + (f.morph ? ' (' + esc(f.morph) + ')' : '') + ' × ♀ ' + esc(m.name || '—') + (m.morph ? ' (' + esc(m.morph) + ')' : '') + '</span></div>' : '') +
       '</div>' +
+      (f.name || m.name ?
+        '<div class="detail-card" style="margin-top:0">' +
+          '<div class="breed-sec-title" style="margin-bottom:8px">👪 亲本</div>' +
+          '<div class="hatch-parents" style="margin-bottom:0">' +
+            (f.name ? '<div class="hatch-parent-box"><div class="hp-sex">♂ 父本</div>' +
+              '<div style="display:flex;align-items:center;gap:8px;margin-top:4px">' +
+              '<img id="clutchDadImg" class="hp-avatar" alt="" style="display:none">' +
+              '<div style="min-width:0"><div class="hp-name">' + esc(f.name) + '</div>' +
+              (f.morph ? '<div class="hp-morph">' + esc(f.morph) + '</div>' : '') +
+              '</div></div></div>' : '') +
+            (m.name ? '<div class="hatch-parent-box"><div class="hp-sex">♀ 母本</div>' +
+              '<div style="display:flex;align-items:center;gap:8px;margin-top:4px">' +
+              '<img id="clutchMomImg" class="hp-avatar" alt="" style="display:none">' +
+              '<div style="min-width:0"><div class="hp-name">' + esc(m.name) + '</div>' +
+              (m.morph ? '<div class="hp-morph">' + esc(m.morph) + '</div>' : '') +
+              '</div></div></div>' : '') +
+          '</div>' +
+        '</div>' : '') +
       (c.notes ? '<div style="font-size:13px;color:var(--text2);background:var(--surface);border-radius:var(--radius);padding:8px 12px;margin-bottom:12px">📝 ' + esc(c.notes) + '</div>' : '') +
     '</div>' +
     '<div class="detail-card">' +
@@ -2404,6 +2448,23 @@ function breedRenderDetail(c) {
       '<button class="btn" onclick="breedShowList()">← 返回列表</button>' +
     '</div>';
   breedSwitchView('Detail');
+  loadClutchParentPhotos(c);
+}
+// 窝次详情：异步加载父母本照片（亲本库 parentId 或已建档睫角 geckoId）
+function loadClutchParentPhotos(c) {
+  const f = c.father || {}, m = c.mother || {};
+  if (f.name) loadParentPhoto('clutchDadImg', f);
+  if (m.name) loadParentPhoto('clutchMomImg', m);
+}
+function loadParentPhoto(imgId, p) {
+  const img = document.getElementById(imgId);
+  if (!img) return;
+  const set = image => { if (image) { img.src = image; img.style.display = ''; } };
+  if (p.parentId) {
+    breedDbGet('parents', p.parentId).then(pp => set(pp && pp.image)).catch(() => {});
+  } else if (p.geckoId) {
+    dbGet(p.geckoId).then(g => set(g && g.image)).catch(() => {});
+  }
 }
 function breedRenderEgg(e, clutchId, idx) {
   const st = BREED_EGG_STATUS[e.status] || BREED_EGG_STATUS.incubating;
@@ -2743,13 +2804,24 @@ function openQRModal(url, infoHtml) {
   const box = document.getElementById('eggQrcode');
   box.innerHTML = '';
   // 320px：二维码足够大，手机摄像头易识别（180px + 高密度内容扫码会失败）
-  new QRCode(box, {
+  const qr = new QRCode(box, {
     text: url,
     width: 320, height: 320,
     colorDark: '#0a0a0f',
     colorLight: '#ffffff',
     correctLevel: QRCode.CorrectLevel.M
   });
+  // 转成 <img>：长按图片 = 系统原生「保存到相册」（直接进相册，无选择弹窗）
+  const cv = box.querySelector('canvas');
+  if (cv) {
+    breedQRState.dataUrl = cv.toDataURL('image/png');
+    const img = document.createElement('img');
+    img.src = breedQRState.dataUrl;
+    img.alt = '二维码';
+    img.style.cssText = 'width:100%;max-width:320px;height:auto;display:block;margin:0 auto;border-radius:8px;';
+    box.innerHTML = '';
+    box.appendChild(img);
+  }
   document.getElementById('breedQRModal').classList.add('show');
 }
 // 窝次二维码：一次交配/一窝只生成一个（含 2 颗蛋）
@@ -2790,41 +2862,28 @@ function shareEggQR() {
   } else { toast(breedQRState.url); }
 }
 function saveEggQRImage() {
-  const qrEl = document.querySelector('#eggQrcode canvas') || document.querySelector('#eggQrcode img');
-  if (!qrEl) { toast('⚠️ 二维码尚未生成'); return; }
-  const qrSize = qrEl.tagName === 'CANVAS' ? qrEl.width : 180;
-  const padding = 20, textH = 40;
-  const canvas = document.createElement('canvas');
-  canvas.width = qrSize + padding * 2;
-  canvas.height = qrSize + padding * 2 + textH;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(qrEl, padding, padding, qrSize, qrSize);
-  ctx.fillStyle = '#101828'; ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText(breedQRState && breedQRState.url ? decodeURIComponent(breedQRState.url.split('?')[1] || '') : '', canvas.width / 2, canvas.height - 14);
-  const dataUrl = canvas.toDataURL('image/png');
-  if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
-    // 原生 App（APK）：写入缓存目录并调起系统分享（可存相册/发送）
+  // 优先系统分享（Android 分享面板可直接「保存到相册」）
+  if (breedQRState && breedQRState.dataUrl) {
     try {
-      window.Capacitor.Plugins.Filesystem.writeFile({
-        path: 'qr-' + Date.now() + '.png',
-        data: dataUrl.split(',')[1],
-        directory: 'CACHE'
-      }).then(res => {
-        window.Capacitor.Plugins.Share.share({
-          title: '窝次二维码',
-          text: breedQRState ? breedQRState.url : '窝次二维码',
-          files: [res.uri]
-        });
-      });
-    } catch (e) { toast('保存失败: ' + e.message); }
-  } else {
+      const bin = atob(breedQRState.dataUrl.split(',')[1]);
+      const arr = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+      const file = new File([arr], 'qr-' + Date.now() + '.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: '窝次二维码' }).catch(() => {});
+        return;
+      }
+    } catch (e) { /* 不支持 → 回退 */ }
+  }
+  // 回退：长按二维码图片保存到相册（img 已显示）或下载
+  const qrEl = document.querySelector('#eggQrcode img') || document.querySelector('#eggQrcode canvas');
+  if (qrEl) {
     const a = document.createElement('a');
     a.download = 'egg-qr-' + Date.now() + '.png';
-    a.href = dataUrl;
+    a.href = qrEl.tagName === 'IMG' ? qrEl.src : qrEl.toDataURL('image/png');
     a.click();
   }
-  toast('📥 二维码图片已保存');
+  toast('📥 长按二维码图片可直接保存到相册');
 }
 
 
