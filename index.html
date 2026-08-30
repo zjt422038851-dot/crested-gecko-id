@@ -1905,24 +1905,44 @@ function shareQR(id, name) {
   }
 }
 
-// APK 原生保存：优先相册直存（SaveFile.saveImage，MediaStore 零交互），回退 Filesystem+Share
-// base64 含 +/= 字符，消息通道可能转义——必须 encodeURIComponent 传输，原生端 Uri.decode 还原
+// APK 原生保存：像素级方案（绕开 WebView canvas.toDataURL 硬件加速白屏 bug）
+// 读取像素 → 按位打包(1bit/像素) → 原生重建 Bitmap → PNG 写相册
+function imageBitsToBase64(imgData, w, h) {
+  const bytesPerRow = Math.ceil(w / 8);
+  const packed = new Uint8Array(bytesPerRow * h);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4;
+      const dark = imgData[i] < 128 && imgData[i + 1] < 128 && imgData[i + 2] < 128;
+      if (dark) packed[y * bytesPerRow + (x >> 3)] |= (0x80 >> (x & 7));
+    }
+  }
+  let bin = '';
+  for (let i = 0; i < packed.length; i++) bin += String.fromCharCode(packed[i]);
+  return btoa(bin);
+}
 function nativeSaveImage(dataUrl, name) {
-  const b64 = encodeURIComponent(dataUrl.split(',')[1] || '');
   const fallback = () => {
     window.Capacitor.Plugins.Filesystem.writeFile({ path: name, data: dataUrl.split(',')[1] || '', directory: 'CACHE' })
       .then(res => window.Capacitor.Plugins.Share.share({ files: [res.uri], title: name }))
       .catch(() => toast('⚠️ 保存失败'));
   };
-  try {
-    if (window.Capacitor.Plugins && window.Capacitor.Plugins.SaveFile) {
-      window.Capacitor.Plugins.SaveFile.saveImage({ name: name, data: b64 })
+  const img = new Image();
+  img.onload = () => {
+    try {
+      const c = document.createElement('canvas');
+      c.width = img.width; c.height = img.height;
+      const ctx = c.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(img, 0, 0);
+      const d = ctx.getImageData(0, 0, img.width, img.height).data;
+      const bits = encodeURIComponent(imageBitsToBase64(d, img.width, img.height));
+      window.Capacitor.Plugins.SaveFile.saveImage({ name: name, width: img.width, height: img.height, bits: bits })
         .then(() => toast('✅ 已保存到相册（Pictures/CiliGen）'))
-        .catch(fallback);
-      return;
-    }
-    fallback();
-  } catch (e) { fallback(); }
+        .catch(() => fallback());
+    } catch (e) { fallback(); }
+  };
+  img.onerror = () => fallback();
+  img.src = dataUrl;
 }
 
 function saveQRImage(id, name) {
