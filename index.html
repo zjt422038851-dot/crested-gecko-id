@@ -2123,16 +2123,28 @@ function exportData() {
     const all = { geckos: geckos, clutches: clutches, parents: parents, exportedAt: new Date().toISOString() };
     const data = JSON.stringify(all, null, 2);
     const filename = '睫角数据_' + new Date().toISOString().slice(0, 10) + '.json';
-    // 原生 App（APK）：调起系统「保存到」选择器（SAF 插件），用户选择位置后写入
+    // 原生 App（APK）：分块传输调起系统「保存到」选择器（SAF 插件），用户选择位置后写入
+    // 分块原因：完整备份含照片 base64 可达数 MB，一次性跨 JS 桥传输会 OOM 闪退（曾出现）
     if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
-      const b64 = encodeURIComponent(btoa(unescape(encodeURIComponent(data))));
+      const b64 = btoa(unescape(encodeURIComponent(data)));
+      const CHUNK = 256 * 1024; // 每块 256KB base64，单次桥传输安全
+      const chunks = [];
+      for (let i = 0; i < b64.length; i += CHUNK) chunks.push(b64.slice(i, i + CHUNK));
+      const cap = window.Capacitor.Plugins.SaveFile;
       const doSaveFile = () => {
-        window.Capacitor.Plugins.SaveFile.save({ name: filename, data: b64 })
+        cap.save({ name: filename, size: b64.length })
+          .then(() => {
+            let p = Promise.resolve();
+            chunks.forEach((c, i) => {
+              p = p.then(() => cap.writeChunk({ index: i, chunk: encodeURIComponent(c) }));
+            });
+            return p.then(() => cap.endSave());
+          })
           .then(() => toast('✅ 备份已保存到所选位置'))
           .catch(err => { if (err && err.message !== 'cancelled') toast('⚠️ 保存失败: ' + err.message); });
       };
       try {
-        if (window.Capacitor.Plugins && window.Capacitor.Plugins.SaveFile) {
+        if (cap) {
           doSaveFile();
         } else {
           // 回退：写 Documents 目录 + 系统分享
@@ -3279,14 +3291,38 @@ function applyDirectParams(search) {
       return true;
     }
     if (gecko) {
+      // 切到列表 Tab（睫角详情在列表模块内）
+      function activateList() {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+        const listTab = document.querySelector('.tab-btn[data-page="list"]');
+        if (listTab) listTab.classList.add('active');
+        const pl = document.getElementById('pageList');
+        if (pl) pl.classList.add('active');
+      }
+      function showGeckoNotFound(id) {
+        activateList();
+        const d = document.getElementById('detailContent');
+        if (d) {
+          d.innerHTML =
+            '<div class="empty-state" style="padding:60px 20px"><div class="icon">🦎</div>' +
+            '<p>未找到睫角 <strong>' + esc(id) + '</strong><br>' +
+            '<span style="font-size:13px;color:var(--text3)">该数据可能不在当前浏览器/设备（扫码工具的内置浏览器与常用浏览器数据不互通）</span></p>' +
+            '<button class="btn btn-outline" onclick="showPage(\'list\')" style="margin-top:12px;padding:8px 20px;width:auto;display:inline-block;">返回列表</button></div>';
+          document.getElementById('pageDetail').classList.add('active');
+        } else {
+          toast('未找到睫角 ' + id);
+        }
+      }
       let tries = 0;
       function tryGecko() {
         dbGet(gecko).then(g => {
-          if (g) showDetail(gecko);
+          if (g) { activateList(); showDetail(gecko); }
           else if (tries < 6) { tries++; setTimeout(tryGecko, 400); }
-          else { showDetail(gecko); }
+          else { showGeckoNotFound(gecko); }
         }).catch(() => {
           if (tries < 6) { tries++; setTimeout(tryGecko, 400); }
+          else { showGeckoNotFound(gecko); }
         });
       }
       setTimeout(tryGecko, 150);
