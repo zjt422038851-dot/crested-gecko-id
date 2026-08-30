@@ -1906,10 +1906,11 @@ function shareQR(id, name) {
 }
 
 // APK 原生保存：优先相册直存（SaveFile.saveImage，MediaStore 零交互），回退 Filesystem+Share
+// base64 含 +/= 字符，消息通道可能转义——必须 encodeURIComponent 传输，原生端 Uri.decode 还原
 function nativeSaveImage(dataUrl, name) {
-  const b64 = dataUrl.split(',')[1];
+  const b64 = encodeURIComponent(dataUrl.split(',')[1] || '');
   const fallback = () => {
-    window.Capacitor.Plugins.Filesystem.writeFile({ path: name, data: b64, directory: 'CACHE' })
+    window.Capacitor.Plugins.Filesystem.writeFile({ path: name, data: dataUrl.split(',')[1] || '', directory: 'CACHE' })
       .then(res => window.Capacitor.Plugins.Share.share({ files: [res.uri], title: name }))
       .catch(() => toast('⚠️ 保存失败'));
   };
@@ -2096,7 +2097,7 @@ function exportData() {
     const filename = '睫角数据_' + new Date().toISOString().slice(0, 10) + '.json';
     // 原生 App（APK）：调起系统「保存到」选择器（SAF 插件），用户选择位置后写入
     if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
-      const b64 = btoa(unescape(encodeURIComponent(data)));
+      const b64 = encodeURIComponent(btoa(unescape(encodeURIComponent(data))));
       const doSaveFile = () => {
         window.Capacitor.Plugins.SaveFile.save({ name: filename, data: b64 })
           .then(() => toast('✅ 备份已保存到所选位置'))
