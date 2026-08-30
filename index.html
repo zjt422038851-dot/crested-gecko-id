@@ -2132,16 +2132,26 @@ function exportData() {
       for (let i = 0; i < b64.length; i += CHUNK) chunks.push(b64.slice(i, i + CHUNK));
       const cap = window.Capacitor.Plugins.SaveFile;
       const doSaveFile = () => {
-        cap.save({ name: filename, size: b64.length })
-          .then(() => {
-            let p = Promise.resolve();
-            chunks.forEach((c, i) => {
-              p = p.then(() => cap.writeChunk({ index: i, chunk: encodeURIComponent(c) }));
-            });
-            return p.then(() => cap.endSave());
-          })
-          .then(() => toast('✅ 备份已保存到所选位置'))
-          .catch(err => { if (err && err.message !== 'cancelled') toast('⚠️ 保存失败: ' + err.message); });
+        // 能力检测：新版插件支持分块（writeChunk），旧版只支持单次 data 传输
+        const hasChunk = !!(cap && typeof cap.writeChunk === 'function' && cap.writeChunk.call);
+        if (hasChunk) {
+          // 新版：分块传输（防 OOM 闪退）
+          cap.save({ name: filename, size: b64.length })
+            .then(() => {
+              let p = Promise.resolve();
+              chunks.forEach((c, i) => {
+                p = p.then(() => cap.writeChunk({ index: i, chunk: encodeURIComponent(c) }));
+              });
+              return p.then(() => cap.endSave());
+            })
+            .then(() => toast('✅ 备份已保存到所选位置'))
+            .catch(err => { if (err && err.message !== 'cancelled') toast('⚠️ 保存失败: ' + err.message); });
+        } else {
+          // 旧版插件（无 writeChunk）：单次传输（小数据可用，大文件可能失败）
+          cap.save({ name: filename, data: encodeURIComponent(b64) })
+            .then(() => toast('✅ 备份已保存到所选位置'))
+            .catch(err => { if (err && err.message !== 'cancelled') toast('⚠️ 保存失败: ' + err.message); });
+        }
       };
       try {
         if (cap) {
