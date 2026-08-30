@@ -1907,75 +1907,21 @@ function shareQR(id, name) {
   }
 }
 
-// APK 原生保存：模块级方案（直接用 QRCode.js 内部模块矩阵 isDark，完全不经过 canvas——
-// WebView 硬件加速下 canvas 读取(toDataURL/getImageData)都返回全白）
-// canvas 兜底用：像素按位打包
-function imageBitsToBase64(imgData, w, h) {
-  const bytesPerRow = Math.ceil(w / 8);
-  const packed = new Uint8Array(bytesPerRow * h);
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const i = (y * w + x) * 4;
-      const dark = imgData[i] < 128 && imgData[i + 1] < 128 && imgData[i + 2] < 128;
-      if (dark) packed[y * bytesPerRow + (x >> 3)] |= (0x80 >> (x & 7));
-    }
-  }
-  let bin = '';
-  for (let i = 0; i < packed.length; i++) bin += String.fromCharCode(packed[i]);
-  return btoa(bin);
-}
-function qrModulesToBits(qr) {
-  const q = qr._oQRCode;
-  const n = q.moduleCount;
-  const size = n + 8; // 4 模块静区（扫码识别更稳）
-  const bytesPerRow = Math.ceil(size / 8);
-  const packed = new Uint8Array(bytesPerRow * size);
-  for (let r = 0; r < n; r++) {
-    for (let c = 0; c < n; c++) {
-      if (q.isDark(r, c)) {
-        const y = r + 4, x = c + 4;
-        packed[y * bytesPerRow + (x >> 3)] |= (0x80 >> (x & 7));
-      }
-    }
-  }
-  let bin = '';
-  for (let i = 0; i < packed.length; i++) bin += String.fromCharCode(packed[i]);
-  return { bits: btoa(bin), width: size, height: size };
-}
+// APK 原生保存：直接保存原始二维码图（320×320 dataUrl 本来就是对的）
+// base64 含 +/= 字符必须 encodeURIComponent 传输，原生 Uri.decode 还原
 function nativeSaveImage(dataUrl, name, qr) {
   const fallback = () => {
     window.Capacitor.Plugins.Filesystem.writeFile({ path: name, data: dataUrl.split(',')[1] || '', directory: 'CACHE' })
       .then(res => window.Capacitor.Plugins.Share.share({ files: [res.uri], title: name }))
       .catch(() => toast('⚠️ 保存失败'));
   };
-  const sendToNative = (w, h, bitsB64) => {
-    window.Capacitor.Plugins.SaveFile.saveImage({ name: name, width: w, height: h, bits: encodeURIComponent(bitsB64) })
-      .then(() => toast('✅ 已保存到相册（Pictures/CiliGen）'))
+  try {
+    window.Capacitor.Plugins.SaveFile.saveImage({
+      name: name,
+      data: encodeURIComponent(dataUrl.split(',')[1] || '')
+    }).then(() => toast('✅ 已保存到相册（Pictures/CiliGen）'))
       .catch(() => fallback());
-  };
-  // 主路径：QRCode.js 内部模块矩阵（纯数据，无渲染依赖，100% 可靠）
-  if (qr && qr._oQRCode && typeof qr._oQRCode.isDark === 'function') {
-    try {
-      const p = qrModulesToBits(qr);
-      sendToNative(p.width, p.height, p.bits);
-      return;
-    } catch (e) { /* 回退 canvas */ }
-  }
-  // 兜底：canvas 像素读取
-  const img = new Image();
-  img.onload = () => {
-    try {
-      const c = document.createElement('canvas');
-      c.width = img.width; c.height = img.height;
-      const ctx = c.getContext('2d', { willReadFrequently: true });
-      ctx.drawImage(img, 0, 0);
-      const d = ctx.getImageData(0, 0, img.width, img.height).data;
-      const bits = encodeURIComponent(imageBitsToBase64(d, img.width, img.height));
-      sendToNative(img.width, img.height, bits);
-    } catch (e) { fallback(); }
-  };
-  img.onerror = () => fallback();
-  img.src = dataUrl;
+  } catch (e) { fallback(); }
 }
 
 function saveQRImage(id, name) {
