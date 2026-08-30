@@ -1905,6 +1905,25 @@ function shareQR(id, name) {
   }
 }
 
+// APK 原生保存：优先相册直存（SaveFile.saveImage，MediaStore 零交互），回退 Filesystem+Share
+function nativeSaveImage(dataUrl, name) {
+  const b64 = dataUrl.split(',')[1];
+  const fallback = () => {
+    window.Capacitor.Plugins.Filesystem.writeFile({ path: name, data: b64, directory: 'CACHE' })
+      .then(res => window.Capacitor.Plugins.Share.share({ files: [res.uri], title: name }))
+      .catch(() => toast('⚠️ 保存失败'));
+  };
+  try {
+    if (window.Capacitor.Plugins && window.Capacitor.Plugins.SaveFile) {
+      window.Capacitor.Plugins.SaveFile.saveImage({ name: name, data: b64 })
+        .then(() => toast('✅ 已保存到相册（Pictures/CiliGen）'))
+        .catch(fallback);
+      return;
+    }
+    fallback();
+  } catch (e) { fallback(); }
+}
+
 function saveQRImage(id, name) {
   const qrEl = document.querySelector('#qrcode canvas') || document.querySelector('#qrcode img');
   if (!qrEl) { toast('\u26A0\uFE0F \u4E8C\u7EF4\u7801\u5C1A\u672A\u751F\u6210'); return; }
@@ -1939,20 +1958,8 @@ function saveQRImage(id, name) {
 
   const dataUrl = canvas.toDataURL('image/png');
   if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
-    // 原生 App（APK）：写入缓存目录并调起系统分享（可存相册/发送）
-    try {
-      window.Capacitor.Plugins.Filesystem.writeFile({
-        path: 'qr-' + Date.now() + '.png',
-        data: dataUrl.split(',')[1],
-        directory: 'CACHE'
-      }).then(res => {
-        window.Capacitor.Plugins.Share.share({
-          title: name + ' 的二维码',
-          text: name + ' 的睫角二维码',
-          files: [res.uri]
-        });
-      });
-    } catch (e) { toast('保存失败: ' + e.message); }
+    // 原生 App（APK）：相册直存（SaveFile.saveImage）→ 回退 Filesystem+Share
+    nativeSaveImage(dataUrl, name + '_二维码.png');
   } else {
     // 网页版：优先系统分享（Android 分享面板可直接「保存到相册」）
     try {
@@ -2089,14 +2096,22 @@ function exportData() {
     const filename = '睫角数据_' + new Date().toISOString().slice(0, 10) + '.json';
     // 原生 App（APK）：调起系统「保存到」选择器（SAF 插件），用户选择位置后写入
     if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+      const b64 = btoa(unescape(encodeURIComponent(data)));
+      const doSaveFile = () => {
+        window.Capacitor.Plugins.SaveFile.save({ name: filename, data: b64 })
+          .then(() => toast('✅ 备份已保存到所选位置'))
+          .catch(err => { if (err && err.message !== 'cancelled') toast('⚠️ 保存失败: ' + err.message); });
+      };
       try {
-        window.Capacitor.Plugins.SaveFile.save({
-          name: filename,
-          data: btoa(unescape(encodeURIComponent(data)))
-        }).then(() => toast('✅ 备份已保存到所选位置')).catch(err => {
-          if (err && err.message !== 'cancelled') toast('⚠️ 保存失败: ' + err.message);
-        });
-      } catch (e) { toast('⚠️ 保存失败: ' + e.message); }
+        if (window.Capacitor.Plugins && window.Capacitor.Plugins.SaveFile) {
+          doSaveFile();
+        } else {
+          // 回退：写 Documents 目录 + 系统分享
+          window.Capacitor.Plugins.Filesystem.writeFile({ path: filename, data: b64, directory: 'DOCUMENTS' })
+            .then(res => window.Capacitor.Plugins.Share.share({ files: [res.uri], title: filename, text: '睫角守宫数据备份' }))
+            .catch(() => toast('⚠️ 导出失败'));
+        }
+      } catch (e) { toast('⚠️ 导出失败: ' + e.message); }
       return;
     }
     // 优先 File System Access API：让用户选择保存位置（Chrome/Edge/Android Chrome，https 环境）
@@ -2904,7 +2919,14 @@ function shareEggQR() {
   } else { toast(breedQRState.url); }
 }
 function saveEggQRImage() {
-  // 优先系统分享（Android 分享面板可直接「保存到相册」）
+  // 原生 App（APK）：相册直存（SaveFile.saveImage）→ 回退 Filesystem+Share
+  if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+    if (breedQRState && breedQRState.dataUrl) {
+      nativeSaveImage(breedQRState.dataUrl, 'qr-' + Date.now() + '.png');
+    } else { toast('⚠️ 二维码尚未生成'); }
+    return;
+  }
+  // 网页版：优先系统分享（Android 分享面板可直接「保存到相册」）
   if (breedQRState && breedQRState.dataUrl) {
     try {
       const bin = atob(breedQRState.dataUrl.split(',')[1]);
