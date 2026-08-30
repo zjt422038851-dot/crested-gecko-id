@@ -1907,21 +1907,50 @@ function shareQR(id, name) {
   }
 }
 
-// APK 原生保存：直接保存原始二维码图（320×320 dataUrl 本来就是对的）
-// base64 含 +/= 字符必须 encodeURIComponent 传输，原生 Uri.decode 还原
+// APK 原生保存：模块级打包（全局连续位布局，与原生 Java 逐像素解包完全一致）
+// 每模块放大 scale 倍 + 4 模块静区 → 输出大尺寸清晰二维码
+function qrModulesToBits(qr) {
+  const q = qr._oQRCode;
+  const n = q.moduleCount;
+  const scale = 10;
+  const size = (n + 8) * scale; // 4 模块静区 × scale
+  const bytesPerRow = Math.ceil(size / 8);
+  const packed = new Uint8Array(bytesPerRow * size);
+  let idx = 0, bit = 0;
+  for (let y = 0; y < size; y++) {
+    const mr = Math.floor(y / scale) - 4;
+    for (let x = 0; x < size; x++) {
+      const mc = Math.floor(x / scale) - 4;
+      const dark = mr >= 0 && mr < n && mc >= 0 && mc < n && q.isDark(mr, mc);
+      if (dark) packed[idx] |= (0x80 >> bit);
+      bit++;
+      if (bit === 8) { bit = 0; idx++; }
+    }
+  }
+  let bin = '';
+  for (let i = 0; i < packed.length; i++) bin += String.fromCharCode(packed[i]);
+  return { bits: btoa(bin), width: size, height: size };
+}
+
 function nativeSaveImage(dataUrl, name, qr) {
   const fallback = () => {
     window.Capacitor.Plugins.Filesystem.writeFile({ path: name, data: dataUrl.split(',')[1] || '', directory: 'CACHE' })
       .then(res => window.Capacitor.Plugins.Share.share({ files: [res.uri], title: name }))
       .catch(() => toast('⚠️ 保存失败'));
   };
-  try {
-    window.Capacitor.Plugins.SaveFile.saveImage({
-      name: name,
-      data: encodeURIComponent(dataUrl.split(',')[1] || '')
-    }).then(() => toast('✅ 已保存到相册（Pictures/CiliGen）'))
-      .catch(() => fallback());
-  } catch (e) { fallback(); }
+  if (qr && qr._oQRCode && typeof qr._oQRCode.isDark === 'function') {
+    try {
+      const p = qrModulesToBits(qr);
+      window.Capacitor.Plugins.SaveFile.saveImage({
+        name: name,
+        width: p.width, height: p.height,
+        bits: encodeURIComponent(p.bits)
+      }).then(() => toast('✅ 已保存到相册（Pictures/CiliGen）'))
+        .catch(() => fallback());
+      return;
+    } catch (e) { /* 回退 */ }
+  }
+  fallback();
 }
 
 function saveQRImage(id, name) {
