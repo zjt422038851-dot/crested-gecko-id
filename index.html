@@ -1881,6 +1881,8 @@ function showDetail(id) {
         colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.H
       });
+      // 保存 QR 实例（保存相册用，绕开 WebView canvas 白屏）
+      window._detailQR = qr;
       // 转成 <img>：长按图片 = 系统原生「保存到相册」
       const cv = c.querySelector('canvas');
       if (cv) {
@@ -1905,8 +1907,9 @@ function shareQR(id, name) {
   }
 }
 
-// APK 原生保存：像素级方案（绕开 WebView canvas.toDataURL 硬件加速白屏 bug）
-// 读取像素 → 按位打包(1bit/像素) → 原生重建 Bitmap → PNG 写相册
+// APK 原生保存：模块级方案（直接用 QRCode.js 内部模块矩阵 isDark，完全不经过 canvas——
+// WebView 硬件加速下 canvas 读取(toDataURL/getImageData)都返回全白）
+// canvas 兜底用：像素按位打包
 function imageBitsToBase64(imgData, w, h) {
   const bytesPerRow = Math.ceil(w / 8);
   const packed = new Uint8Array(bytesPerRow * h);
@@ -1921,12 +1924,44 @@ function imageBitsToBase64(imgData, w, h) {
   for (let i = 0; i < packed.length; i++) bin += String.fromCharCode(packed[i]);
   return btoa(bin);
 }
-function nativeSaveImage(dataUrl, name) {
+function qrModulesToBits(qr) {
+  const q = qr._oQRCode;
+  const n = q.moduleCount;
+  const size = n + 8; // 4 模块静区（扫码识别更稳）
+  const bytesPerRow = Math.ceil(size / 8);
+  const packed = new Uint8Array(bytesPerRow * size);
+  for (let r = 0; r < n; r++) {
+    for (let c = 0; c < n; c++) {
+      if (q.isDark(r, c)) {
+        const y = r + 4, x = c + 4;
+        packed[y * bytesPerRow + (x >> 3)] |= (0x80 >> (x & 7));
+      }
+    }
+  }
+  let bin = '';
+  for (let i = 0; i < packed.length; i++) bin += String.fromCharCode(packed[i]);
+  return { bits: btoa(bin), width: size, height: size };
+}
+function nativeSaveImage(dataUrl, name, qr) {
   const fallback = () => {
     window.Capacitor.Plugins.Filesystem.writeFile({ path: name, data: dataUrl.split(',')[1] || '', directory: 'CACHE' })
       .then(res => window.Capacitor.Plugins.Share.share({ files: [res.uri], title: name }))
       .catch(() => toast('⚠️ 保存失败'));
   };
+  const sendToNative = (w, h, bitsB64) => {
+    window.Capacitor.Plugins.SaveFile.saveImage({ name: name, width: w, height: h, bits: encodeURIComponent(bitsB64) })
+      .then(() => toast('✅ 已保存到相册（Pictures/CiliGen）'))
+      .catch(() => fallback());
+  };
+  // 主路径：QRCode.js 内部模块矩阵（纯数据，无渲染依赖，100% 可靠）
+  if (qr && qr._oQRCode && typeof qr._oQRCode.isDark === 'function') {
+    try {
+      const p = qrModulesToBits(qr);
+      sendToNative(p.width, p.height, p.bits);
+      return;
+    } catch (e) { /* 回退 canvas */ }
+  }
+  // 兜底：canvas 像素读取
   const img = new Image();
   img.onload = () => {
     try {
@@ -1936,9 +1971,7 @@ function nativeSaveImage(dataUrl, name) {
       ctx.drawImage(img, 0, 0);
       const d = ctx.getImageData(0, 0, img.width, img.height).data;
       const bits = encodeURIComponent(imageBitsToBase64(d, img.width, img.height));
-      window.Capacitor.Plugins.SaveFile.saveImage({ name: name, width: img.width, height: img.height, bits: bits })
-        .then(() => toast('✅ 已保存到相册（Pictures/CiliGen）'))
-        .catch(() => fallback());
+      sendToNative(img.width, img.height, bits);
     } catch (e) { fallback(); }
   };
   img.onerror = () => fallback();
@@ -1980,7 +2013,7 @@ function saveQRImage(id, name) {
   const dataUrl = canvas.toDataURL('image/png');
   if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
     // 原生 App（APK）：相册直存（SaveFile.saveImage）→ 回退 Filesystem+Share
-    nativeSaveImage(dataUrl, name + '_二维码.png');
+    nativeSaveImage(dataUrl, name + '_二维码.png', window._detailQR);
   } else {
     // 网页版：优先系统分享（Android 分享面板可直接「保存到相册」）
     try {
@@ -2889,6 +2922,8 @@ function openQRModal(url, infoHtml) {
     colorLight: '#ffffff',
     correctLevel: QRCode.CorrectLevel.M
   });
+  // 保存 QRCode 实例（模块数据源，保存相册用，绕开 WebView canvas 白屏）
+  breedQRState.qr = qr;
   // 转成 <img>：长按图片 = 系统原生「保存到相册」（直接进相册，无选择弹窗）
   const cv = box.querySelector('canvas');
   if (cv) {
@@ -2943,7 +2978,7 @@ function saveEggQRImage() {
   // 原生 App（APK）：相册直存（SaveFile.saveImage）→ 回退 Filesystem+Share
   if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
     if (breedQRState && breedQRState.dataUrl) {
-      nativeSaveImage(breedQRState.dataUrl, 'qr-' + Date.now() + '.png');
+      nativeSaveImage(breedQRState.dataUrl, 'qr-' + Date.now() + '.png', breedQRState.qr);
     } else { toast('⚠️ 二维码尚未生成'); }
     return;
   }
