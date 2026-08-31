@@ -1933,7 +1933,7 @@ function qrModulesToBits(qr) {
   return { bits: btoa(bin), width: size, height: size };
 }
 
-function nativeSaveImage(dataUrl, name, qr, label) {
+function nativeSaveImage(dataUrl, name, qr, label, date) {
   const fallback = () => {
     window.Capacitor.Plugins.Filesystem.writeFile({ path: name, data: dataUrl.split(',')[1] || '', directory: 'CACHE' })
       .then(res => window.Capacitor.Plugins.Share.share({ files: [res.uri], title: name }))
@@ -1946,7 +1946,8 @@ function nativeSaveImage(dataUrl, name, qr, label) {
         name: name,
         width: p.width, height: p.height,
         bits: encodeURIComponent(p.bits),
-        label: label || ''
+        label: label || '',
+        date: date || ''
       }).then(() => toast('✅ 已保存到相册（Pictures/CiliGen）'))
         .catch(() => fallback());
       return;
@@ -1990,7 +1991,7 @@ function saveQRImage(id, name) {
   const dataUrl = canvas.toDataURL('image/png');
   if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
     // 原生 App（APK）：相册直存（SaveFile.saveImage）→ 回退 Filesystem+Share
-    nativeSaveImage(dataUrl, name + '_二维码.png', window._detailQR, '出壳日期 ' + (window._detailHatchDate || ''));
+    nativeSaveImage(dataUrl, name + '_二维码.png', window._detailQR, '出壳日期', window._detailHatchDate || '');
   } else {
     // 网页版：优先系统分享（Android 分享面板可直接「保存到相册」）
     try {
@@ -2907,9 +2908,9 @@ async function breedSaveHatched() {
 }
 
 // ====== 二维码弹窗（窝次共用 + 出壳后睫角） ======
-let breedQRState = null; // { url, label }
-function openQRModal(url, infoHtml, label) {
-  breedQRState = { url, label: label || '' };
+let breedQRState = null; // { url, label, date }
+function openQRModal(url, infoHtml, label, date) {
+  breedQRState = { url, label: label || '', date: date || '' };
   document.getElementById('eggQRInfo').innerHTML = infoHtml;
   const box = document.getElementById('eggQrcode');
   box.innerHTML = '';
@@ -2953,7 +2954,7 @@ function showClutchQR(clutchId) {
       (hatched ? '（已出壳 ' + hatched + '）' : '') + '<br>下蛋 ' + esc(c.laidDate || '—') +
       (c.temp ? ' · ' + esc(c.temp) + '℃' : '') +
       '<br>♂ ' + esc(f.name || '—') + ' × ♀ ' + esc(m.name || '—'),
-      '繁殖日期 ' + (c.laidDate || '—'));
+      '繁殖日期', c.laidDate || '—');
   });
 }
 // 睫角二维码：出壳建档后自动生成
@@ -2966,7 +2967,7 @@ function showGeckoQR(geckoId) {
       '睫角 ' + esc(g.id) + '<br>' + esc(g.gene || '') +
       '<br>出壳 ' + esc(g.hatchDate || '—') +
       '<br>♂ ' + esc((g.father && g.father.name) || '—') + ' × ♀ ' + esc((g.mother && g.mother.name) || '—'),
-      '出壳日期 ' + (g.hatchDate || '—'));
+      '出壳日期', g.hatchDate || '—');
   });
 }
 function breedCloseQR() { document.getElementById('breedQRModal').classList.remove('show'); }
@@ -2980,7 +2981,7 @@ function saveEggQRImage() {
   // 原生 App（APK）：相册直存（SaveFile.saveImage）→ 回退 Filesystem+Share
   if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
     if (breedQRState && breedQRState.dataUrl) {
-      nativeSaveImage(breedQRState.dataUrl, 'qr-' + Date.now() + '.png', breedQRState.qr, breedQRState.label);
+      nativeSaveImage(breedQRState.dataUrl, 'qr-' + Date.now() + '.png', breedQRState.qr, breedQRState.label, breedQRState.date);
     } else { toast('⚠️ 二维码尚未生成'); }
     return;
   }
