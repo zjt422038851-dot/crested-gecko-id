@@ -2052,7 +2052,13 @@ function startScanner() {
 
     html5QrCode.start(
       { facingMode: "environment" },
-      { fps: 10, qrbox: { width: 250, height: 250 } },
+      {
+        fps: 10,
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1.0,
+        // 连续对焦：解决 WebView 相机扫码不对焦（Android Chrome/WebView 支持 focusMode）
+        videoConstraints: { facingMode: 'environment', focusMode: 'continuous' }
+      },
       onScanSuccess,
       () => {}
     ).catch(e => {
